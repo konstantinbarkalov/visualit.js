@@ -7,6 +7,7 @@ class Visualit {
       this.onResize();
     }
     this.basic.setColor(0, 0, 255);
+    this.basic.setAlpha(1);
     this.onResize();
   }
   onResize() {
@@ -19,6 +20,7 @@ class Visualit {
   updateStyle() {
     this.ctx.strokeStyle = this.colorName;
     this.ctx.fillStyle = this.colorName;
+    this.ctx.globalAlpha = this.opacity;
   }
   clampChannel(c) {
     return Math.max(0, Math.min(255, c));
@@ -49,6 +51,10 @@ class Visualit {
     },
     setColor: (r, g, b) => {
       this.colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
+      this.updateStyle();
+    },
+    setAlpha: (opacity) => {
+      this.opacity = opacity;
       this.updateStyle();
     },
     fillRect: (xFrom, yFrom, xTo, yTo) => {
