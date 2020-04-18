@@ -35,7 +35,7 @@ class Visualit {
     },
     plotCircle: (x, y, radius) => {
       this.ctx.beginPath();
-      this.ctx.ellipse(x, y, radius, radius);
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.stroke();
     },
     plotPixel: (x, y) => {
@@ -56,7 +56,7 @@ class Visualit {
     },
     fillCircle: (x, y, radius) => {
       this.ctx.beginPath();
-      this.ctx.ellipse(x, y, radius, radius);
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.fill();
     },
     pause: async (msec) => {
