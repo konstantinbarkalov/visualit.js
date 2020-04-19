@@ -3,9 +3,9 @@ class Visualit {
     this.canvasContainerDom = canvasContainerDom;
     this.canvasDom = canvasDom;
     this.ctx = this.canvasDom.getContext('2d');
-    window.onresize = () => {
+    window.addEventListener('resize', () => {
       this.onResize();
-    }
+    });
     this.basic.setColor(0, 0, 255);
     this.basic.setAlpha(1);
     this.onResize();
@@ -74,6 +74,12 @@ class Visualit {
 }
 
 const canvasContainerDom = document.getElementById('output-canvas-container');
-const canvasDom = document.getElementById('output-canvas');
-const visualit = new Visualit(canvasContainerDom, canvasDom);
-const basic = visualit.basic;
+const canvasBottomDom = document.getElementById('output-canvas-bottom');
+const canvasMainDom = document.getElementById('output-canvas-main');
+const canvasTopDom = document.getElementById('output-canvas-top');
+const visualitBottom = new Visualit(canvasContainerDom, canvasBottomDom);
+const visualitMain = new Visualit(canvasContainerDom, canvasMainDom);
+const visualitTop = new Visualit(canvasContainerDom, canvasTopDom);
+const basicBottom = visualitBottom.basic;
+const basic = visualitMain.basic;
+const basicTop = visualitTop.basic;

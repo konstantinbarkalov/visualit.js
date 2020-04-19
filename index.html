@@ -7,20 +7,30 @@
       body {
         margin: 0;
       }
-      #output-canvas {
+      #output-canvas-container {
+        position: relative;
+        background-color: black;
         width: 100%;
         height: 100%;
-        background-color: black;
+      }
+      .output-canvas {
+        width: 100%;
+        height: 100%;
+
+        position: absolute;
       }
     </style>
   </heead>
   <body>
     <div id="app-root">
       <div id="output-canvas-container">
-        <canvas id="output-canvas"></canvas>
+        <canvas id="output-canvas-bottom" class="output-canvas"></canvas>
+        <canvas id="output-canvas-main" class="output-canvas"></canvas>
+        <canvas id="output-canvas-top" class="output-canvas"></canvas>
       </div>
     </div>
     <script src="./visualit.js"></script>
+    <script src="./input.js"></script>
     <script src="./art.js"></script>
     <script>
       console.log('start');
