@@ -8,6 +8,7 @@ class Visualit {
     });
     this.basic.setColor(0, 0, 255);
     this.basic.setAlpha(1);
+    this.basic.setLineWidth(1);
     this.onResize();
   }
   onResize() {
@@ -21,6 +22,7 @@ class Visualit {
     this.ctx.strokeStyle = this.colorName;
     this.ctx.fillStyle = this.colorName;
     this.ctx.globalAlpha = this.opacity;
+    this.ctx.lineWidth = this.lineWidth;
   }
   clampChannel(c) {
     return Math.max(0, Math.min(255, c));
@@ -55,6 +57,10 @@ class Visualit {
     },
     setAlpha: (opacity) => {
       this.opacity = opacity;
+      this.updateStyle();
+    },
+    setLineWidth: (lineWidth) => {
+      this.lineWidth = lineWidth;
       this.updateStyle();
     },
     fillRect: (xFrom, yFrom, xTo, yTo) => {
