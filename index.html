@@ -19,7 +19,7 @@
 
         position: absolute;
       }
-      #output-canvas-top {
+      #output-canvas-extra, #output-canvas-top {
         mix-blend-mode: screen;
       }
     </style>
@@ -29,12 +29,15 @@
       <div id="output-canvas-container">
         <canvas id="output-canvas-bottom" class="output-canvas"></canvas>
         <canvas id="output-canvas-main" class="output-canvas"></canvas>
+        <canvas id="output-canvas-extra" class="output-canvas"></canvas>
         <canvas id="output-canvas-top" class="output-canvas"></canvas>
       </div>
     </div>
-    <script src="./visualit.js"></script>
     <script src="./input.js"></script>
+    <script src="./visualit.js"></script>
     <script src="./art.js"></script>
+    <!-- <script src="./artOriginal.js"></script>
+    <script src="./artCheapStars.js"></script> -->
     <script>
       console.log('start');
       art();

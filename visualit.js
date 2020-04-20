@@ -1,4 +1,4 @@
-class Visualit {
+class VisualitCanvas {
   constructor (canvasContainerDom, canvasDom) {
     this.canvasContainerDom = canvasContainerDom;
     this.canvasDom = canvasDom;
@@ -71,6 +71,32 @@ class Visualit {
       this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.fill();
     },
+  }
+}
+
+class VisualitCanvasPie {
+  constructor (canvasContainerDom, canvasDom) {
+    this.canvasContainerDom = canvasContainerDom;
+    this.canvasDom = canvasDom;
+    this.canvas = Object.fromEntries(Object.entries(this.canvasDom).map(([canvasDomKey, canvasDomValue]) => {
+      return [canvasDomKey, new VisualitCanvas(this.canvasContainerDom, canvasDomValue)];
+    }));
+    this.basic = Object.fromEntries(Object.entries(this.canvas).map(([canvasKey, canvasValue]) => {
+      return [canvasKey, canvasValue.basic];
+    }));
+  }
+  basic = {
+  }
+}
+
+class Visualit {
+  constructor (canvasContainerDom, canvasDom) {
+    this.canvasPie = new VisualitCanvasPie(canvasContainerDom, canvasDom);
+    this.input = new VisualitInput(canvasContainerDom);
+    this.basic.pie = this.canvasPie.basic;
+    this.basic.input = this.input.basic;
+  }
+  basic = {
     pause: async (msec) => {
       await new Promise((resolve) => {
         setTimeout(resolve, msec);
@@ -78,14 +104,12 @@ class Visualit {
     }
   }
 }
-
 const canvasContainerDom = document.getElementById('output-canvas-container');
-const canvasBottomDom = document.getElementById('output-canvas-bottom');
-const canvasMainDom = document.getElementById('output-canvas-main');
-const canvasTopDom = document.getElementById('output-canvas-top');
-const visualitBottom = new Visualit(canvasContainerDom, canvasBottomDom);
-const visualitMain = new Visualit(canvasContainerDom, canvasMainDom);
-const visualitTop = new Visualit(canvasContainerDom, canvasTopDom);
-const basicBottom = visualitBottom.basic;
-const basic = visualitMain.basic;
-const basicTop = visualitTop.basic;
+const canvasDom = {
+  bottom: document.getElementById('output-canvas-bottom'),
+  main: document.getElementById('output-canvas-main'),
+  extra: document.getElementById('output-canvas-extra'),
+  top: document.getElementById('output-canvas-top'),
+}
+const visualit = new Visualit(canvasContainerDom, canvasDom);
+const basic = visualit.basic;
