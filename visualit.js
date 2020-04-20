@@ -3,6 +3,8 @@ class VisualitCanvas {
     this.canvasContainerDom = canvasContainerDom;
     this.canvasDom = canvasDom;
     this.ctx = this.canvasDom.getContext('2d');
+    this.offscreenCanvasDom = new OffscreenCanvas(0, 0);
+    this.offscreenCtx = this.offscreenCanvasDom.getContext('2d');
     window.addEventListener('resize', () => {
       this.onResize();
     });
@@ -16,6 +18,8 @@ class VisualitCanvas {
     this.h = this.canvasContainerDom.clientHeight;
     this.canvasDom.width = this.w;
     this.canvasDom.height = this.h;
+    this.offscreenCanvasDom.width = this.w;
+    this.offscreenCanvasDom.height = this.h;
     this.updateStyle();
   }
   updateStyle() {
@@ -42,14 +46,22 @@ class VisualitCanvas {
       this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.stroke();
     },
-    plotPixel: (x, y) => {
+    plotDot: (x, y) => {
       this.basic.plotLine(x, y, x, y);
     },
     print: (x, y, text) => {
       this.ctx.fillText(text, x, y);
     },
-    cls: () => {
-      this.ctx.clearRect(0, 0, this.w, this.h);
+    cls: (amount = 1) => {
+      if (amount < 1) {
+        this.offscreenCtx.drawImage(this.canvasDom, 0, 0);
+        this.ctx.clearRect(0, 0, this.w, this.h);
+        this.ctx.globalAlpha = 1 - amount;
+        this.ctx.drawImage(this.offscreenCanvasDom, 0, 0);
+        this.ctx.globalAlpha = this.opacity;
+      } else {
+        this.ctx.clearRect(0, 0, this.w, this.h);
+      }
     },
     setColor: (r, g, b) => {
       this.colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
@@ -70,6 +82,30 @@ class VisualitCanvas {
       this.ctx.beginPath();
       this.ctx.arc(x, y, radius, 0, Math.PI * 2);
       this.ctx.fill();
+    },
+    plotPolyline: (coords, isLoop = false) => {
+      this.ctx.beginPath();
+      const firstCoord = coords[0];
+      const lastCoord = coords[coords.length - 1];
+      this.ctx.moveTo(firstCoord.x, firstCoord.y);
+      coords.forEach((coord)=>{
+        this.ctx.lineTo(coord.x, coord.y);
+      });
+      if (isLoop) {
+        this.ctx.lineTo(lastCoord.x, lastCoord.y);
+      }
+      this.ctx.stroke();
+    },
+    fillPolygon: (coords) => {
+      this.ctx.beginPath();
+      const firstCoord = coords[0];
+      const lastCoord = coords[coords.length - 1];
+      this.ctx.moveTo(firstCoord.x, firstCoord.y);
+      coords.forEach((coord)=>{
+        this.ctx.lineTo(coord.x, coord.y);
+      });
+      this.ctx.lineTo(lastCoord.x, lastCoord.y);
+      this.ctx.stroke();
     },
   }
 }
