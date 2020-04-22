@@ -1,0 +1,23 @@
+{
+  "name": "visualit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "standaloneHttpServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node standaloneHttpServer.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/konstantinbarkalov/visualit.js.git"
+  },
+  "author": "Konstantin Barkalov <mail@barkalov.ru>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/konstantinbarkalov/visualit.js/issues"
+  },
+  "homepage": "https://github.com/konstantinbarkalov/visualit.js#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
