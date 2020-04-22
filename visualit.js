@@ -29,7 +29,10 @@ class VisualitCanvas {
     this.ctx.lineWidth = this.lineWidth;
   }
   clampChannel(c) {
-    return Math.max(0, Math.min(255, c));
+    return Math.floor(Math.max(0, Math.min(255, c)));
+  }
+  clampAlpha(a) {
+    return Math.max(0, Math.min(1, a));
   }
   basic = {
     plotLine: (xFrom, yFrom, xTo, yTo) => {
@@ -68,7 +71,7 @@ class VisualitCanvas {
       this.updateStyle();
     },
     setAlpha: (opacity) => {
-      this.opacity = opacity;
+      this.opacity = this.clampAlpha(opacity);
       this.updateStyle();
     },
     setLineWidth: (lineWidth) => {
@@ -105,7 +108,7 @@ class VisualitCanvas {
         this.ctx.lineTo(coord.x, coord.y);
       });
       this.ctx.lineTo(lastCoord.x, lastCoord.y);
-      this.ctx.stroke();
+      this.ctx.fill();
     },
   }
 }
