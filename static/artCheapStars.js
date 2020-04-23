@@ -14,6 +14,72 @@ class UniquePolys {
   }
 
 }
+class Point {
+  everyCoord(callbackFn) {
+    const clone = this.clone();
+    clone.coords = Object.fromEntries(Object.entries(clone.coords).map(([coordKey, coordValue]) => {
+      return [coordKey, callbackFn(coordValue, coordKey)];
+    }));
+  }
+  subtract(point) {
+    return this.everyCoord((coordValue, coordKey)=>{
+      return coordValue - point.coords[coordKey];
+    })
+  }
+  add(point) {
+    return this.everyCoord((coordValue, coordKey)=>{
+      return coordValue + point.coords[coordKey];
+    })
+  }
+  multiply(point) {
+    return this.everyCoord((coordValue, coordKey)=>{
+      return coordValue + point.coords[coordKey];
+    })
+  }
+}
+class Point2D extends Point {
+  coords = {
+    x: 0,
+    y: 0,
+  }
+  constructor(x, y) {
+    this.coords.x = x;
+    this.coords.y = y;
+  }
+  clone() {
+    return new Point2D(this.coords.x, this.coords.y);
+  }
+}
+class Point3D extends Point {
+  coords = {
+    x: 0,
+    y: 0,
+    z: 0,
+  }
+  constructor(x, y, z) {
+    this.coords.x = x;
+    this.coords.y = y;
+    this.coords.z = z;
+  }
+  clone() {
+    return new Point3D(this.coords.x, this.coords.y, this.coords.z);
+  }
+  getZLogE() {
+    return Math.log(this.z);
+  }
+  static relativeTo(origin, point) {
+    return origin.subtract(point);
+  }
+}
+class Camera {
+  position = new Point3D();
+  zLogFactor = 1 / Math.log(2);
+  mapToScreen(point3D) {
+    const relativeToCamera = Point3D.relativeTo(position, point3D);
+    const zLog = relativeToCamera.getZLogE() * zLogFactor;
+    return new Point2D(relativeToCamera.coords.x * zLog, relativeToCamera.coords.y * zLog);
+  }
+}
 async function art() {
   await artCheapStars();
 }
