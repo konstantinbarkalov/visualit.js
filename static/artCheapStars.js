@@ -81,7 +81,7 @@ class Camera {
   }
 }
 async function art() {
-  await artCheapStars();
+  await artStars();
 }
 function gappedSinRatio(input, everyNth = 2) {
   const isPulse = (Math.floor(input) % everyNth === 0);
@@ -225,7 +225,7 @@ function sampleBlinkRatio(t, freq, phase) {
   const blinkRatio = Math.sin(blinkSinParam) / 2 + 0.5;
   return blinkRatio;
 }
-async function artCheapStars() {
+async function artStars() {
   const randomStars = generateStars(300);
   const zodiacStars = generateZodiacStarsFromPolys(zodiacPolys);
   const stars = randomStars.concat(zodiacStars);
@@ -240,15 +240,15 @@ async function artCheapStars() {
     t += dt;
     for (let starId = 0; starId < stars.length; starId++) {
       const star = stars[starId];
-      drawCheapStar(star, t);
+      drawStar(star, t);
     }
     for (let dustId = 0; dustId < dusts.length; dustId++) {
       const dust = dusts[dustId];
-      drawCheapDust(dust, t);
+      drawDust(dust, t);
     }
     for (let lineId = 0; lineId < lanes.length; lineId++) {
       const line = lanes[lineId];
-      drawCheapLine(line, t);
+      drawLine(line, t);
     }
     basic.pie.main.setAlpha(1);
     basic.pie.main.setColor(255, 255, 255);
@@ -257,7 +257,7 @@ async function artCheapStars() {
   }
 
 }
-function fillCheapStarShape(x, y, exSize, plusSize) {
+function fillStarShape(x, y, exSize, plusSize) {
   basic.pie.main.fillPolygon([
     {
       x: x + exSize,
@@ -293,7 +293,7 @@ function fillCheapStarShape(x, y, exSize, plusSize) {
     },
   ]);
 }
-function drawCheapStar(star, t) {
+function drawStar(star, t) {
   const blinkRatio = sampleBlinkRatio(t, star.entropy.blink.freq, star.entropy.blink.phase);
 
   let burnWaveRatio = sampleBurnWaveRatio(t, star.x, star.y, star.entropy.burnWave.phaseShift, 50);
@@ -319,10 +319,10 @@ function drawCheapStar(star, t) {
   for (let layerId = 0; layerId < intense; layerId++) {
     const factor = layerId + 1;
     basic.pie.main.setColor(star.color.r * factor, star.color.g * factor, star.color.b * factor);
-    fillCheapStarShape(screenPos.x, screenPos.y, exSize / factor, plusSize / factor);
+    fillStarShape(screenPos.x, screenPos.y, exSize / factor, plusSize / factor);
   }
 }
-function drawCheapDust(star, t) {
+function drawDust(star, t) {
   const blinkRatio = sampleBlinkRatio(t, star.entropy.blink.freq, star.entropy.blink.phase);
 
 
@@ -352,7 +352,7 @@ function drawCheapDust(star, t) {
 
 }
 
-function drawCheapLine(line, t) {
+function drawLine(line, t) {
   let burnWaveRatioFrom = sampleBurnWaveRatio(t, line.from.x, line.from.y, 0, 3);
   let burnWaveRatioTo = sampleBurnWaveRatio(t, line.to.x, line.to.y, 0, 3);
   let burnWaveRatio = Math.max(burnWaveRatioFrom, burnWaveRatioTo);
