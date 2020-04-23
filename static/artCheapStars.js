@@ -2,7 +2,7 @@ const overscan = 800;
 class UniquePolys {
   dictionary = {};
   getUid(point) {
-    return JSON.stringify(point);
+    return JSON.stringify(point.coords);
   }
   addValue(point, obj) {
     const uid = this.getUid(point);
@@ -20,6 +20,7 @@ class Point {
     clone.coords = Object.fromEntries(Object.entries(clone.coords).map(([coordKey, coordValue]) => {
       return [coordKey, callbackFn(coordValue, coordKey)];
     }));
+    return clone;
   }
   subtract(point) {
     return this.everyCoord((coordValue, coordKey)=>{
@@ -42,9 +43,12 @@ class Point2D extends Point {
     x: 0,
     y: 0,
   }
-  constructor(x, y) {
+  zLog = 1;
+  constructor(x = 0, y = 0, zLog = 1) {
+    super();
     this.coords.x = x;
     this.coords.y = y;
+    this.zLog = zLog;
   }
   clone() {
     return new Point2D(this.coords.x, this.coords.y);
@@ -56,7 +60,8 @@ class Point3D extends Point {
     y: 0,
     z: 0,
   }
-  constructor(x, y, z) {
+  constructor(x = 0, y = 0, z = 0) {
+    super();
     this.coords.x = x;
     this.coords.y = y;
     this.coords.z = z;
@@ -64,20 +69,20 @@ class Point3D extends Point {
   clone() {
     return new Point3D(this.coords.x, this.coords.y, this.coords.z);
   }
-  getZLogE() {
-    return Math.log(this.z);
+  getZLog(zLogBase) {
+    return Math.pow(zLogBase, -this.coords.z);
   }
   static relativeTo(origin, point) {
-    return origin.subtract(point);
+    return point.subtract(origin);
   }
 }
 class Camera {
   position = new Point3D();
-  zLogFactor = 1 / Math.log(2);
+  zLogBase = 2;
   mapToScreen(point3D) {
-    const relativeToCamera = Point3D.relativeTo(position, point3D);
-    const zLog = relativeToCamera.getZLogE() * zLogFactor;
-    return new Point2D(relativeToCamera.coords.x * zLog, relativeToCamera.coords.y * zLog);
+    const relativeToCamera = Point3D.relativeTo(this.position, point3D);
+    const zLog = relativeToCamera.getZLog(this.zLogBase);
+    return new Point2D(relativeToCamera.coords.x * zLog, relativeToCamera.coords.y * zLog, zLog);
   }
 }
 async function art() {
@@ -91,30 +96,35 @@ function gappedSinRatio(input, everyNth = 2) {
     return 0;
   }
 }
+class Star {
+  point = new Point3D();
+  style = {
+    color: {
+      r: Math.random() * 255,
+      g: Math.random() * 255,
+      b: Math.random() * 255,
+    },
+    intense: Math.random(),
+    entropy: {
+      blink: {
+        phase: Math.random(),
+        freq: Math.random() * 1,
+      },
+      burnWave: {
+        amount: Math.random(),
+        phaseShift: (Math.random() - 0.5) / 4,
+      }
+    }
+  }
+}
 function generateStars(starsCount) {
   let stars = [];
   for (let starId = 0; starId < starsCount; starId++) {
-    stars[starId] = {
-      x: Math.random() * (basic.input.w + overscan),
-      y: Math.random() * basic.input.h,
-      zLog: Math.random() * 0.5 + 0.5,
-      color: {
-        r: Math.random() * 255,
-        g: Math.random() * 255,
-        b: Math.random() * 255,
-      },
-      intense: Math.random(),
-      entropy: {
-        blink: {
-          phase: Math.random(),
-          freq: Math.random() * 1,
-        },
-        burnWave: {
-          amount: Math.random(),
-          phaseShift: (Math.random() - 0.5) / 4,
-        }
-      }
-    }
+    const star = new Star();
+    star.point.coords.x = Math.random() * (basic.input.w + overscan);
+    star.point.coords.y = Math.random() * basic.input.h,
+    star.point.coords.z = Math.random() * 1 - 0.5,
+    stars[starId] = star;
   }
   return stars;
 }
@@ -127,11 +137,11 @@ function ditherPolys(polys) {
     });
   });
   uniquePolys.dictionary = Object.fromEntries(Object.entries(uniquePolys.dictionary).map(([uid, point]) => {
-    return [uid, {
-      x: point.x + Math.random() * 20,
-      y: point.y + Math.random() * 20,
-      zLog: point.zLog + Math.random() * 0.05,
-    }]
+    return [uid, point.add(new Point3D(
+      Math.random() * 20 - 10,
+      Math.random() * 20 - 10,
+      Math.random() * 0.2 - 0.1,
+    ))];
   }));
 
   const newPolys = polys.map((poly) => {
@@ -142,14 +152,10 @@ function ditherPolys(polys) {
   });
   return newPolys;
 }
-function shiftPolys(polys, dX, dY, fZLog) {
+function shiftPolys(polys, dX, dY, dZ) {
   const newPolys = polys.map((poly) => {
     const newPoly = poly.map((point) => {
-      return {
-        x: point.x + dX,
-        y: point.y + dY,
-        zLog: point.zLog * fZLog,
-      }
+      return point.add(new Point3D(dX, dY, dZ));
     });
     return newPoly;
   });
@@ -171,35 +177,23 @@ function generateZodiacLanesFromPolys(polys) {
   return lanes;
 }
 function generateZodiacStarsFromPolys(polys) {
-  let stars = [];
   const uniquePolys = new UniquePolys();
   polys.forEach((poly) => {
     poly.forEach((point) => {
       uniquePolys.addValue(point, point);
     });
   });
-  Object.values(uniquePolys.dictionary).forEach((point) => {
-    stars.push({
-      x: point.x,
-      y: point.y,
-      zLog: point.zLog,
-      color: {
-        r: Math.random() * 255,
-        g: Math.random() * 255,
-        b: Math.random() * 255,
-      },
-      intense: 2 + Math.random(),
-      entropy: {
-        blink: {
-          phase: Math.random(),
-          freq: Math.random() * 1,
-        },
-        burnWave: {
-          amount: 1,
-          phaseShift: 0,
-        }
-      }
-    });
+  const stars = Object.values(uniquePolys.dictionary).map((point) => {
+    const star = new Star();
+    star.point.coords.x = point.coords.x;
+    star.point.coords.y = point.coords.y;
+    star.point.coords.z = point.coords.z;
+    star.style.intense = 2 + Math.random(),
+    star.style.entropy.burnWave = {
+      amount: 1,
+      phaseShift: 0,
+    }
+    return star;
   });
   return stars;
 }
@@ -293,437 +287,197 @@ function fillStarShape(x, y, exSize, plusSize) {
     },
   ]);
 }
+function timeshift(point, t) {
+  const timeshiftedX = (point.coords.x + t * 100) % (basic.input.w + overscan);
+  const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
+  return timeshiftedPoint;
+}
 function drawStar(star, t) {
-  const blinkRatio = sampleBlinkRatio(t, star.entropy.blink.freq, star.entropy.blink.phase);
+  const timeshiftedPoint = timeshift(star.point, t);
+  const screenPoint = camera.mapToScreen(timeshiftedPoint);
 
-  let burnWaveRatio = sampleBurnWaveRatio(t, star.x, star.y, star.entropy.burnWave.phaseShift, 50);
-  burnWaveRatio *= star.entropy.burnWave.amount;
+  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
 
-  //let intense = 0.4 * star.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+  let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift, 50);
+  burnWaveRatio *= star.style.entropy.burnWave.amount;
+
+  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
   let intense =
-    + 0.5 * star.intense
+    + 0.5 * star.style.intense
     + 0.5 * blinkRatio
     + 2 * burnWaveRatio;
-
   const tweakedIntense1 = Math.pow(intense, 1/2);
   const tweakedIntense2 = Math.pow(intense, 2);
-  const exSize = tweakedIntense2 * 4 * star.zLog;
-  const plusSize = tweakedIntense1 * 1 * star.zLog;
+  const exSize = tweakedIntense2 * 4 * screenPoint.zLog;
+  const plusSize = tweakedIntense1 * 1 * screenPoint.zLog;
   const alpha = tweakedIntense1 * 1;
   basic.pie.main.setAlpha(alpha);
-  const twX = (star.x + t * 100) % (basic.input.w + overscan);
-  const screenPos = {
-    x: twX * star.zLog,
-    y: star.y * star.zLog,
-  }
+
   for (let layerId = 0; layerId < intense; layerId++) {
     const factor = layerId + 1;
-    basic.pie.main.setColor(star.color.r * factor, star.color.g * factor, star.color.b * factor);
-    fillStarShape(screenPos.x, screenPos.y, exSize / factor, plusSize / factor);
+    basic.pie.main.setColor(star.style.color.r * factor, star.style.color.g * factor, star.style.color.b * factor);
+    fillStarShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
   }
 }
 function drawDust(star, t) {
-  const blinkRatio = sampleBlinkRatio(t, star.entropy.blink.freq, star.entropy.blink.phase);
+  const timeshiftedPoint = timeshift(star.point, t);
+  const screenPoint = camera.mapToScreen(timeshiftedPoint);
 
+  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
 
-  let burnWaveRatio = sampleBurnWaveRatio(t, star.x, star.y, star.entropy.burnWave.phaseShift - 0.1, 2);
-  //burnWaveRatio *= star.entropy.burnWave.amount;
+  let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift - 0.1, 2);
+  //burnWaveRatio *= star.style.entropy.burnWave.amount;
 
-  //let intense = 0.4 * star.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
   let intense =
-    + 0.5 * star.intense
+    + 0.5 * star.style.intense
     + 0.5 * blinkRatio
     + 2 * burnWaveRatio
     - 1.1;
 
   if (intense > 0) {
     const tweakedIntense = Math.pow(intense, 1/2);
-    const twX = (star.x + t * 100) % (basic.input.w + overscan);
-    const screenPos = {
-      x: twX * star.zLog,
-      y: star.y * star.zLog,
-    }
-    const plusSize = tweakedIntense / star.zLog * 1.5;
+    const plusSize = tweakedIntense / screenPoint.zLog * 1.5;
     basic.pie.main.setAlpha(tweakedIntense);
-    basic.pie.main.setColor(star.color.r, star.color.g, star.color.b);
-    basic.pie.main.plotLine(screenPos.x, screenPos.y - plusSize, screenPos.x, screenPos.y + plusSize);
-    basic.pie.main.plotLine(screenPos.x - plusSize, screenPos.y, screenPos.x + plusSize, screenPos.y);
+    basic.pie.main.setColor(star.style.color.r, star.style.color.g, star.style.color.b);
+    basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
+    basic.pie.main.plotLine(screenPoint.coords.x - plusSize, screenPoint.coords.y, screenPoint.coords.x + plusSize, screenPoint.coords.y);
   }
 
 }
 
 function drawLine(line, t) {
-  let burnWaveRatioFrom = sampleBurnWaveRatio(t, line.from.x, line.from.y, 0, 3);
-  let burnWaveRatioTo = sampleBurnWaveRatio(t, line.to.x, line.to.y, 0, 3);
+  const timeshiftedPointFrom = timeshift(line.from, t);
+  const screenPointFrom = camera.mapToScreen(timeshiftedPointFrom);
+
+  const timeshiftedPointTo = timeshift(line.to, t);
+  const screenPointTo = camera.mapToScreen(timeshiftedPointTo);
+
+  let burnWaveRatioFrom = sampleBurnWaveRatio(t, timeshiftedPointFrom.coords.x, timeshiftedPointFrom.coords.y, 0, 3);
+  let burnWaveRatioTo = sampleBurnWaveRatio(t, timeshiftedPointTo.coords.x, timeshiftedPointTo.coords.y, 0, 3);
   let burnWaveRatio = Math.max(burnWaveRatioFrom, burnWaveRatioTo);
 
-  //let intense = 0.4 * star.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
   let intense =
     + 1 * burnWaveRatio
     + 0.2;
 
   const tweakedIntense = Math.pow(intense, 1);
-  const twXFrom = (line.from.x + t * 100) % (basic.input.w + overscan);
-  const twXTo = (line.to.x + t * 100) % (basic.input.w + overscan);
 
-  const screenPos = {
-    from: {
-      x: twXFrom * line.from.zLog,
-      y: line.from.y * line.from.zLog,
-    },
-    to: {
-      x: twXTo * line.to.zLog,
-      y: line.to.y * line.to.zLog,
-    }
-  }
   let wrapMarginRatioFrom = Math.max(
-    Math.max(0, (100 - screenPos.from.x) / 100),
-    Math.max(0, (screenPos.from.x - basic.input.w + 100) / 100),
+    Math.max(0, (100 - screenPointFrom.coords.x) / 100),
+    Math.max(0, (screenPointFrom.coords.x - basic.input.w + 100) / 100),
   );
   let wrapMarginRatioTo = Math.max(
-      Math.max(0, (100 - screenPos.to.x) / 100),
-      Math.max(0, (screenPos.to.x - basic.input.w + 100) / 100),
+      Math.max(0, (100 - screenPointTo.coords.x) / 100),
+      Math.max(0, (screenPointTo.coords.x - basic.input.w + 100) / 100),
     );
   let wrapMarginRatio = Math.max(wrapMarginRatioFrom, wrapMarginRatioTo);
 
   basic.pie.main.setAlpha(tweakedIntense - wrapMarginRatio);
   basic.pie.main.setColor(255, 255, 255);
-  basic.pie.main.plotLine(screenPos.from.x, screenPos.from.y, screenPos.to.x, screenPos.to.y);
+  basic.pie.main.plotLine(screenPointFrom.coords.x, screenPointFrom.coords.y, screenPointTo.coords.x, screenPointTo.coords.y);
 }
 
 let zodiacPolys = [
   [
-    {
-      x: 50,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 100,
-      zLog: 1
-    },
-    {
-      x: 0,
-      y: 100,
-      zLog: 1
-    },
-    {
-      x: 0,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 50,
-      y: 0,
-      zLog: 1
-    }
+    new Point3D( 50, 0, 0 ),
+    new Point3D( 100, 0, 0 ),
+    new Point3D( 100, 100, 0 ),
+    new Point3D( 0, 100, 0 ),
+    new Point3D( 0, 0, 0 ),
+    new Point3D( 50, 0, 0 ),
   ],
   [
-    {
-      x: 50,
-      y: -50,
-      zLog: 1
-    },
-    {
-      x: 50,
-      y: 0,
-      zLog: 1
-    }
+    new Point3D( 50, -50, 0 ),
+    new Point3D( 50, 0, 0 ),
   ],
   [
-    {
-      x: 0,
-      y: -50,
-      zLog: 1
-    },
-    {
-      x: 50,
-      y: -50,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: -50,
-      zLog: 1
-    }
+    new Point3D( 0, -50, 0 ),
+    new Point3D( 50, -50, 0 ),
+    new Point3D( 100, -50, 0 ),
   ],
   [
-    {
-      x: 0,
-      y: 250,
-      zLog: 1
-    },
-    {
-      x: 50,
-      y: 150,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 250,
-      zLog: 1
-    }
+    new Point3D( 0, 250, 0 ),
+    new Point3D( 50, 150, 0 ),
+    new Point3D( 100, 250, 0 ),
   ],
   [
-    {
-      x: 0,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 400,
-      zLog: 1
-    },
-    {
-      x: 0,
-      y: 400,
-      zLog: 1
-    },
-    {
-      x: 0,
-      y: 300,
-      zLog: 1
-    }
+    new Point3D( 0, 300, 0 ),
+    new Point3D( 100, 300, 0 ),
+    new Point3D( 100, 400, 0 ),
+    new Point3D( 0, 400, 0 ),
+    new Point3D( 0, 300, 0 ),
   ],
   [
-    {
-      x: 100,
-      y: 450,
-      zLog: 1
-    },
-    {
-      x: 100,
-      y: 400,
-      zLog: 1
-    },
-    {
-      x: 0,
-      y: 450,
-      zLog: 1
-    }
+    new Point3D( 100, 450, 0 ),
+    new Point3D( 100, 400, 0 ),
+    new Point3D( 0, 450, 0 ),
   ],
   [ // п
-    {
-      x: 150,
-      y: 100,
-      zLog: 1
-    },
-    {
-      x: 150,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 100,
-      zLog: 1
-    }
+    new Point3D( 150, 100, 0 ),
+    new Point3D( 150, 0, 0 ),
+    new Point3D( 250, 0, 0 ),
+    new Point3D( 250, 100, 0 ),
   ],
   [ // р
-    {
-      x: 150,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 150,
-      y: 250,
-      zLog: 1
-    },
-    {
-      x: 150,
-      y: 150,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 150,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 250,
-      zLog: 1
-    },
-    {
-      x: 150,
-      y: 250,
-      zLog: 1
-    }
+    new Point3D( 150, 300, 0 ),
+    new Point3D( 150, 250, 0 ),
+    new Point3D( 150, 150, 0 ),
+    new Point3D( 250, 150, 0 ),
+    new Point3D( 250, 250, 0 ),
+    new Point3D( 150, 250, 0 ),
   ],
   [ // и1
-    {
-      x: 150,
-      y: 350,
-      zLog: 1
-    },
-    {
-      x: 150,
-      y: 400,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 350,
-      zLog: 1
-    },
+    new Point3D( 150, 350, 0 ),
+    new Point3D( 150, 400, 0 ),
+    new Point3D( 250, 350, 0 ),
   ],
   [ // и2
-    {
-      x: 250,
-      y: 400,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 350,
-      zLog: 1
-    },
-    {
-      x: 250,
-      y: 300,
-      zLog: 1
-    },
+    new Point3D( 250, 400, 0 ),
+    new Point3D( 250, 350, 0 ),
+    new Point3D( 250, 300, 0 ),
 
   ],
   [ // в1
-    {
-      x: 300,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 400,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 400,
-      y: 100,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 100,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 0,
-      zLog: 1
-    },
+    new Point3D( 300, 0, 0 ),
+    new Point3D( 400, 0, 0 ),
+    new Point3D( 400, 100, 0 ),
+    new Point3D( 300, 100, 0 ),
+    new Point3D( 300, 0, 0 ),
   ],
   [ // в2
-    {
-      x: 300,
-      y: 0,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: -50,
-      zLog: 1
-    },
-    {
-      x: 400,
-      y: -50,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 0,
-      zLog: 1
-    },
+    new Point3D( 300, 0, 0 ),
+    new Point3D( 300, -50, 0 ),
+    new Point3D( 400, -50, 0 ),
+    new Point3D( 300, 0, 0 ),
   ],
   [ // е1
-    {
-      x: 400,
-      y: 150,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 150,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 200,
-      zLog: 1
-    },
-    {
-      x: 300,
-      y: 250,
-      zLog: 1
-    },
-    {
-      x: 400,
-      y: 250,
-      zLog: 1
-    },
+    new Point3D( 400, 150, 0 ),
+    new Point3D( 300, 150, 0 ),
+    new Point3D( 300, 200, 0 ),
+    new Point3D( 300, 250, 0 ),
+    new Point3D( 400, 250, 0 ),
   ],
   [ // е2
-    {
-      x: 300,
-      y: 200,
-      zLog: 1
-    },
-    {
-      x: 350,
-      y: 200,
-      zLog: 1
-    },
+    new Point3D( 300, 200, 0 ),
+    new Point3D( 350, 200, 0 ),
   ],
   [ // т1
-    {
-      x: 300,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 350,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 400,
-      y: 300,
-      zLog: 1
-    },
+    new Point3D( 300, 300, 0 ),
+    new Point3D( 350, 300, 0 ),
+    new Point3D( 400, 300, 0 ),
   ],
   [ // т2
-    {
-      x: 350,
-      y: 300,
-      zLog: 1
-    },
-    {
-      x: 350,
-      y: 450,
-      zLog: 1
-    },
+    new Point3D( 350, 300, 0 ),
+    new Point3D( 350, 450, 0 ),
   ],
 
 ]
 
-const polysHeight = 400;
-zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.8);
-zodiacPolys = shiftPolys(zodiacPolys, 0, (basic.input.h - polysHeight) / 2, 1);
+const polysHeight = 450;
+zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.0);
+zodiacPolys = shiftPolys(zodiacPolys, 0, (basic.input.h - polysHeight) / 2, 0);
 zodiacPolys = ditherPolys(zodiacPolys);
+
+const camera = new Camera();
