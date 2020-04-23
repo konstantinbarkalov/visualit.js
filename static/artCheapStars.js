@@ -1,4 +1,4 @@
-const overscan = 800;
+
 class UniquePolys {
   dictionary = {};
   getUid(point) {
@@ -34,7 +34,7 @@ class Point {
   }
   multiply(point) {
     return this.everyCoord((coordValue, coordKey)=>{
-      return coordValue + point.coords[coordKey];
+      return coordValue * point.coords[coordKey];
     })
   }
 }
@@ -72,19 +72,20 @@ class Point3D extends Point {
   getZLog(zLogBase) {
     return Math.pow(zLogBase, -this.coords.z);
   }
-  static relativeTo(origin, point) {
-    return point.subtract(origin);
-  }
 }
 class Camera {
   position = new Point3D();
-  zLogBase = 2;
+  zLogBase = 1;
   mapToScreen(point3D) {
-    const relativeToCamera = Point3D.relativeTo(this.position, point3D);
-    const zLog = relativeToCamera.getZLog(this.zLogBase);
-    return new Point2D(relativeToCamera.coords.x * zLog, relativeToCamera.coords.y * zLog, zLog);
+    const relativeToCamera = point3D.subtract(this.position);
+    const relativeToCameraCenter = relativeToCamera.subtract(fieldCenter);
+    const zLog = relativeToCameraCenter.getZLog(this.zLogBase + basic.input.yRatio);
+    const onScreenCenter = new Point2D(relativeToCameraCenter.coords.x * zLog, relativeToCameraCenter.coords.y * zLog, zLog);
+    const onScreen = onScreenCenter.add(screenCenter);
+    return onScreen;
   }
 }
+
 async function art() {
   await artStars();
 }
@@ -121,9 +122,9 @@ function generateStars(starsCount) {
   let stars = [];
   for (let starId = 0; starId < starsCount; starId++) {
     const star = new Star();
-    star.point.coords.x = Math.random() * (basic.input.w + overscan);
-    star.point.coords.y = Math.random() * basic.input.h,
-    star.point.coords.z = Math.random() * 1 - 0.5,
+    star.point.coords.x = Math.random() * fieldWidth;
+    star.point.coords.y = Math.random() * fieldHeight,
+    star.point.coords.z = (Math.random() - 0.5) * fieldDepth,
     stars[starId] = star;
   }
   return stars;
@@ -138,9 +139,9 @@ function ditherPolys(polys) {
   });
   uniquePolys.dictionary = Object.fromEntries(Object.entries(uniquePolys.dictionary).map(([uid, point]) => {
     return [uid, point.add(new Point3D(
-      Math.random() * 20 - 10,
-      Math.random() * 20 - 10,
-      Math.random() * 0.2 - 0.1,
+      Math.random() * !0 - 5,
+      Math.random() * 10 - 5,
+      Math.random() * 0.4 - 0.2,
     ))];
   }));
 
@@ -228,9 +229,7 @@ async function artStars() {
   const dt = 1 / 30;
   let t = 0;
   while(true) {
-    //basic.pie.main.setAlpha(0.1);
     basic.pie.main.cls();
-    //basic.pie.main.setAlpha(1);
     t += dt;
     for (let starId = 0; starId < stars.length; starId++) {
       const star = stars[starId];
@@ -288,7 +287,7 @@ function fillStarShape(x, y, exSize, plusSize) {
   ]);
 }
 function timeshift(point, t) {
-  const timeshiftedX = (point.coords.x + t * 100) % (basic.input.w + overscan);
+  const timeshiftedX = (point.coords.x + t * 100) % (fieldWidth);
   const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
   return timeshiftedPoint;
 }
@@ -475,9 +474,19 @@ let zodiacPolys = [
 
 ]
 
-const polysHeight = 450;
+const overscan = 800;
+const fieldWidth = basic.input.w + overscan;
+const fieldHeight = basic.input.h;
+const fieldDepth = 2;
+const fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
+const screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2, 0);
+
+
+
+const polysHeight = 500;
+const polysWidth = 500;
 zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.0);
-zodiacPolys = shiftPolys(zodiacPolys, 0, (basic.input.h - polysHeight) / 2, 0);
+zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - polysHeight), (fieldHeight - polysHeight) / 2, 0);
 zodiacPolys = ditherPolys(zodiacPolys);
 
 const camera = new Camera();
