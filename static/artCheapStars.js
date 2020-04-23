@@ -42,13 +42,14 @@ class Point2D extends Point {
   coords = {
     x: 0,
     y: 0,
+    z: 0,
   }
-  zLog = 1;
-  constructor(x = 0, y = 0, zLog = 1) {
+  zScale = 1;
+  constructor(x = 0, y = 0, zScale = 1) {
     super();
     this.coords.x = x;
     this.coords.y = y;
-    this.zLog = zLog;
+    this.zScale = zScale;
   }
   clone() {
     return new Point2D(this.coords.x, this.coords.y);
@@ -69,23 +70,47 @@ class Point3D extends Point {
   clone() {
     return new Point3D(this.coords.x, this.coords.y, this.coords.z);
   }
-  getZLog(zLogBase) {
-    return Math.pow(zLogBase, -this.coords.z);
+  getZScale(zScaleBase) {
+    //    |
+    //    |
+    //    |     /       / x5
+    //    |    /        / x4
+    //    |   /         / x3
+    //    |__/ ________ / x2
+    //    |_/ _________ / x1 - unit z = 0    ^ zScaleBase
+    //    |/___________ / x0 - camera        V
+    //    |
+
+    return zScaleBase / (zScaleBase - this.coords.z);
   }
 }
 class Camera {
-  position = new Point3D();
-  zLogBase = 1;
+  unitPlanePosition = new Point3D(0,0,0);
+  dolly = 1;
   mapToScreen(point3D) {
-    const relativeToCamera = point3D.subtract(this.position);
+    const relativeToCamera = point3D.add(this.unitPlanePosition);
     const relativeToCameraCenter = relativeToCamera.subtract(fieldCenter);
-    const zLog = relativeToCameraCenter.getZLog(this.zLogBase + basic.input.yRatio);
-    const onScreenCenter = new Point2D(relativeToCameraCenter.coords.x * zLog, relativeToCameraCenter.coords.y * zLog, zLog);
+    const zScale = relativeToCameraCenter.getZScale(this.dolly);
+    const onScreenCenter = new Point2D(relativeToCameraCenter.coords.x * zScale, relativeToCameraCenter.coords.y * zScale, zScale);
     const onScreen = onScreenCenter.add(screenCenter);
     return onScreen;
   }
 }
-
+class SmoothInput {
+  decayPerSec = 0.8;
+  xRatio = 0;
+  yRatio = 0;
+  constructor(decayPerSec = this.decayPerSec) {
+    this.decayPerSec = decayPerSec;
+  }
+  iteration(dt) {
+    const remainsPerSec = 1 - this.decayPerSec;
+    const remainsFactor = Math.pow(remainsPerSec, dt);
+    const decayFactor = 1 - remainsFactor;
+    this.xRatio = this.xRatio * remainsFactor + basic.input.xRatio * decayFactor;
+    this.yRatio = this.yRatio * remainsFactor + basic.input.yRatio * decayFactor;
+  }
+}
 async function art() {
   await artStars();
 }
@@ -229,6 +254,10 @@ async function artStars() {
   const dt = 1 / 30;
   let t = 0;
   while(true) {
+    smoothInput.iteration(dt);
+    //camera.dolly = 1 / (smoothInput.yRatio + 0.001);
+    camera.unitPlanePosition.coords.z = -1 + smoothInput.yRatio * 1;
+    camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800;
     basic.pie.main.cls();
     t += dt;
     for (let starId = 0; starId < stars.length; starId++) {
@@ -293,12 +322,11 @@ function timeshift(point, t) {
 }
 function drawStar(star, t) {
   const timeshiftedPoint = timeshift(star.point, t);
-  const screenPoint = camera.mapToScreen(timeshiftedPoint);
-
   const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
-
   let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift, 50);
   burnWaveRatio *= star.style.entropy.burnWave.amount;
+
+  const screenPoint = camera.mapToScreen(timeshiftedPoint);
 
   //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
   let intense =
@@ -307,8 +335,8 @@ function drawStar(star, t) {
     + 2 * burnWaveRatio;
   const tweakedIntense1 = Math.pow(intense, 1/2);
   const tweakedIntense2 = Math.pow(intense, 2);
-  const exSize = tweakedIntense2 * 4 * screenPoint.zLog;
-  const plusSize = tweakedIntense1 * 1 * screenPoint.zLog;
+  const exSize = tweakedIntense2 * 4 * screenPoint.zScale;
+  const plusSize = tweakedIntense1 * 1 * screenPoint.zScale;
   const alpha = tweakedIntense1 * 1;
   basic.pie.main.setAlpha(alpha);
 
@@ -320,12 +348,15 @@ function drawStar(star, t) {
 }
 function drawDust(star, t) {
   const timeshiftedPoint = timeshift(star.point, t);
-  const screenPoint = camera.mapToScreen(timeshiftedPoint);
 
   const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
-
   let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift - 0.1, 2);
   //burnWaveRatio *= star.style.entropy.burnWave.amount;
+
+  const screenPoint = camera.mapToScreen(timeshiftedPoint);
+
+
+
 
   //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
   let intense =
@@ -336,7 +367,7 @@ function drawDust(star, t) {
 
   if (intense > 0) {
     const tweakedIntense = Math.pow(intense, 1/2);
-    const plusSize = tweakedIntense / screenPoint.zLog * 1.5;
+    const plusSize = tweakedIntense / screenPoint.zScale * 1.5;
     basic.pie.main.setAlpha(tweakedIntense);
     basic.pie.main.setColor(star.style.color.r, star.style.color.g, star.style.color.b);
     basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
@@ -479,14 +510,15 @@ const fieldWidth = basic.input.w + overscan;
 const fieldHeight = basic.input.h;
 const fieldDepth = 2;
 const fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
-const screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2, 0);
+const screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2);
 
 
 
 const polysHeight = 500;
 const polysWidth = 500;
 zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.0);
-zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - polysHeight), (fieldHeight - polysHeight) / 2, 0);
+zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - polysWidth) / 2, (fieldHeight - polysHeight) / 2, 0);
 zodiacPolys = ditherPolys(zodiacPolys);
 
 const camera = new Camera();
+const smoothInput = new SmoothInput();
