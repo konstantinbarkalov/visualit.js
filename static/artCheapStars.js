@@ -76,13 +76,13 @@ function ditherPolys(polys) {
   });
   return newPolys;
 }
-function shiftPolys(polys, dx, dy) {
+function shiftPolys(polys, dX, dY, fZLog) {
   const newPolys = polys.map((poly) => {
     const newPoly = poly.map((point) => {
       return {
-        x: point.x + dx,
-        y: point.y + dy,
-        zLog: point.zLog,
+        x: point.x + dX,
+        y: point.y + dY,
+        zLog: point.zLog * fZLog,
       }
     });
     return newPoly;
@@ -328,129 +328,336 @@ function drawCheapLine(line, t) {
 let zodiacPolys = [
   [
     {
-      x: 250,
+      x: 50,
+      y: 0,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: 0,
+      zLog: 1
+    },
+    {
+      x: 100,
       y: 100,
-      zLog: 0.8,
+      zLog: 1
     },
     {
-      x: 300,
+      x: 0,
       y: 100,
-      zLog: 0.8,
+      zLog: 1
     },
     {
-      x: 300,
-      y: 200,
-      zLog: 0.8,
+      x: 0,
+      y: 0,
+      zLog: 1
     },
     {
-      x: 200,
-      y: 200,
-      zLog: 0.8,
-    },
-    {
-      x: 200,
-      y: 100,
-      zLog: 0.8,
-    },
-    {
-      x: 250,
-      y: 100,
-      zLog: 0.8,
-    },
+      x: 50,
+      y: 0,
+      zLog: 1
+    }
   ],
   [
     {
+      x: 50,
+      y: -50,
+      zLog: 1
+    },
+    {
+      x: 50,
+      y: 0,
+      zLog: 1
+    }
+  ],
+  [
+    {
+      x: 0,
+      y: -50,
+      zLog: 1
+    },
+    {
+      x: 50,
+      y: -50,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: -50,
+      zLog: 1
+    }
+  ],
+  [
+    {
+      x: 0,
+      y: 250,
+      zLog: 1
+    },
+    {
+      x: 50,
+      y: 150,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: 250,
+      zLog: 1
+    }
+  ],
+  [
+    {
+      x: 0,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: 400,
+      zLog: 1
+    },
+    {
+      x: 0,
+      y: 400,
+      zLog: 1
+    },
+    {
+      x: 0,
+      y: 300,
+      zLog: 1
+    }
+  ],
+  [
+    {
+      x: 100,
+      y: 450,
+      zLog: 1
+    },
+    {
+      x: 100,
+      y: 400,
+      zLog: 1
+    },
+    {
+      x: 0,
+      y: 450,
+      zLog: 1
+    }
+  ],
+  [ // п
+    {
+      x: 150,
+      y: 100,
+      zLog: 1
+    },
+    {
+      x: 150,
+      y: 0,
+      zLog: 1
+    },
+    {
       x: 250,
-      y: 50,
-      zLog: 0.8,
+      y: 0,
+      zLog: 1
     },
     {
       x: 250,
       y: 100,
-      zLog: 0.8,
-    },
+      zLog: 1
+    }
   ],
-  [
+  [ // р
     {
-      x: 200,
-      y: 50,
-      zLog: 0.8,
+      x: 150,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 150,
+      y: 250,
+      zLog: 1
+    },
+    {
+      x: 150,
+      y: 150,
+      zLog: 1
     },
     {
       x: 250,
-      y: 50,
-      zLog: 0.8,
-    },
-    {
-      x: 300,
-      y: 50,
-      zLog: 0.8,
-    },
-  ],
-  [
-    {
-      x: 200,
-      y: 350,
-      zLog: 0.8,
+      y: 150,
+      zLog: 1
     },
     {
       x: 250,
       y: 250,
-      zLog: 0.8,
+      zLog: 1
     },
     {
-      x: 300,
+      x: 150,
+      y: 250,
+      zLog: 1
+    }
+  ],
+  [ // и1
+    {
+      x: 150,
       y: 350,
-      zLog: 0.8,
+      zLog: 1
+    },
+    {
+      x: 150,
+      y: 400,
+      zLog: 1
+    },
+    {
+      x: 250,
+      y: 350,
+      zLog: 1
     },
   ],
-  [
+  [ // и2
     {
-      x: 200,
+      x: 250,
       y: 400,
-      zLog: 0.8,
+      zLog: 1
+    },
+    {
+      x: 250,
+      y: 350,
+      zLog: 1
+    },
+    {
+      x: 250,
+      y: 300,
+      zLog: 1
+    },
+
+  ],
+  [ // в1
+    {
+      x: 300,
+      y: 0,
+      zLog: 1
+    },
+    {
+      x: 400,
+      y: 0,
+      zLog: 1
+    },
+    {
+      x: 400,
+      y: 100,
+      zLog: 1
     },
     {
       x: 300,
-      y: 400,
-      zLog: 0.8,
+      y: 100,
+      zLog: 1
     },
     {
       x: 300,
-      y: 500,
-      zLog: 0.8,
-    },
-    {
-      x: 200,
-      y: 500,
-      zLog: 0.8,
-    },
-    {
-      x: 200,
-      y: 400,
-      zLog: 0.8,
+      y: 0,
+      zLog: 1
     },
   ],
-  [
+  [ // в2
     {
       x: 300,
-      y: 550,
-      zLog: 0.8,
+      y: 0,
+      zLog: 1
     },
     {
       x: 300,
-      y: 500,
-      zLog: 0.8,
+      y: -50,
+      zLog: 1
     },
     {
-      x: 200,
-      y: 550,
-      zLog: 0.8,
+      x: 400,
+      y: -50,
+      zLog: 1
+    },
+    {
+      x: 300,
+      y: 0,
+      zLog: 1
+    },
+  ],
+  [ // е1
+    {
+      x: 400,
+      y: 150,
+      zLog: 1
+    },
+    {
+      x: 300,
+      y: 150,
+      zLog: 1
+    },
+    {
+      x: 300,
+      y: 200,
+      zLog: 1
+    },
+    {
+      x: 300,
+      y: 250,
+      zLog: 1
+    },
+    {
+      x: 400,
+      y: 250,
+      zLog: 1
+    },
+  ],
+  [ // е2
+    {
+      x: 300,
+      y: 200,
+      zLog: 1
+    },
+    {
+      x: 350,
+      y: 200,
+      zLog: 1
+    },
+  ],
+  [ // т1
+    {
+      x: 300,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 350,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 400,
+      y: 300,
+      zLog: 1
+    },
+  ],
+  [ // т2
+    {
+      x: 350,
+      y: 300,
+      zLog: 1
+    },
+    {
+      x: 350,
+      y: 450,
+      zLog: 1
     },
   ],
 
-];
+]
 
-const polysHeight = 600;
-zodiacPolys = shiftPolys(zodiacPolys, 0, (basic.input.h - polysHeight) / 2);
+const polysHeight = 400;
+zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.8);
+zodiacPolys = shiftPolys(zodiacPolys, 0, (basic.input.h - polysHeight) / 2, 1);
 zodiacPolys = ditherPolys(zodiacPolys);
