@@ -152,9 +152,9 @@ class Sparcle {
     this.vel = vel;
     this.acc = acc;
   };
-  ttl = 2;
+  ttl = 5;
   trail = [];
-  maxTrailLength = 10;
+  maxTrailLength = 150;
   iteration(t, dt) {
     this.ttl -= dt;
     this.vel.coords.x += this.acc.coords.x * dt;
@@ -193,18 +193,40 @@ class SparclePool {
     this.add(pos, vel, acc);
   }
   draw(t, dt) {
-    basic.pie.main.setPlotColor(255,0,0);
-    basic.pie.main.setAlpha(1);
-    basic.pie.main.setLineWidth(3);
+    basic.pie.main.setPlotColor(0,128,255);
+    //basic.pie.main.setAlpha(0.25);
     this.sparcles.forEach((sparcle) => {
       const trailScreenCoords = sparcle.trail.map((worldCoords)=>{
         const timeshiftedPoint = timeshift(worldCoords, t);
         const screenPoint = camera.mapToScreen(timeshiftedPoint);
         return screenPoint.coords;
       });
+      if (trailScreenCoords.length > 0) {
+        let prevCoords = trailScreenCoords[0];
+        if (trailScreenCoords.every((coords) => { // TODO: check just boundary
+          const simpleDistance = Math.abs(prevCoords.x - coords.x) +
+                                 Math.abs(prevCoords.y - coords.y) +
+                                 Math.abs(prevCoords.z - coords.z);
 
-      //basic.pie.main.plotDot(screenPoint.coords.x, screenPoint.coords.y);
-      basic.pie.main.plotPolyline(trailScreenCoords);
+          const isNoTooLong = simpleDistance < 800;
+          prevCoords = coords;
+          return isNoTooLong;
+        })) {
+          splitArray(trailScreenCoords, 5).forEach((sliceCoords, sliceId)=>{
+            basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 10);
+            basic.pie.main.setLineWidth((sliceId + 1) * 1);
+            basic.pie.main.plotPolyline(sliceCoords);
+          })
+        }
+      }
     });
   }
+}
+function splitArray(array, step) {
+  const slices = [];
+  while (array.length > 0) {
+    slices.push(array.slice(0, step + 1));
+    array.splice(0, step);
+  }
+  return slices;
 }

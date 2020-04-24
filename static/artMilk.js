@@ -157,10 +157,10 @@ function artMilkInit() {
   lanes = zodiacLanes.concat(extraZodiacLanes);
 
   sparclePool = new SparclePool();
-  for (let i = 0; i < 100; i++) {
-    sparclePool.addRandom();
+  // for (let i = 0; i < 100; i++) {
+  //   sparclePool.addRandom();
 
-  }
+  // }
 
 }
 function artMilkIteration(t, dt) {
@@ -171,6 +171,7 @@ function artMilkIteration(t, dt) {
   camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
 
   basic.pie.main.cls();
+  basic.pie.main.setLineWidth(1);
   for (let starId = 0; starId < stars.length; starId++) {
     const star = stars[starId];
     drawStar(star, t);
@@ -183,11 +184,16 @@ function artMilkIteration(t, dt) {
     const line = lanes[lineId];
     drawLine(line, t);
   }
-  const randomStarId = Math.floor(Math.random() * stars.length);
-  const randomStar = stars[randomStarId];
-  sparclePool.addRandomAtPos(randomStar.point.clone());
+  if (basic.input.isPrimaryPressed) {
+    for (let j = 0; j < 1; j++) {
+      const randomStarId = Math.floor(Math.random() * stars.length);
+      const randomStar = stars[randomStarId];
+      sparclePool.addRandomAtPos(randomStar.point.clone());
+    }
+  }
   sparclePool.iteration(t, dt);
   sparclePool.draw(t, dt);
+
   basic.pie.main.setAlpha(1);
   basic.pie.main.setFillColor(255, 255, 255);
   basic.pie.main.print(10, basic.input.h - 10, t.toFixed(2));

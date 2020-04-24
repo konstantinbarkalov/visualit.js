@@ -10,15 +10,25 @@ class VisualitInput {
     this.containerDom.addEventListener('mousewheel', (e) => {
       this.onMouseScroll(e.wheelDelta);
     });
-    document.addEventListener('onkeydown', (e) => {
-      if (e.code === 32) {
+    document.addEventListener('keydown', (e) => {
+      if (e.which === 32) {
+        e.preventDefault();
         this.onPrimaryKeyChange(true);
       }
     });
-    document.addEventListener('onkeyup', (e) => {
-      if (e.code === 32) {
+    document.addEventListener('keyup', (e) => {
+      if (e.which === 32) {
         this.onPrimaryKeyChange(false);
       }
+    });
+    document.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      this.onPrimaryKeyChange(true);
+
+    });
+    document.addEventListener('mouseup', (e) => {
+      this.onPrimaryKeyChange(false);
+
     });
     this.onResize();
     this.onMouseMove(this.basic.w / 2, this.basic.h / 2);
@@ -53,6 +63,7 @@ class VisualitInput {
   }
   onPrimaryKeyChange(isPressed) {
     this.basic.isPrimaryPressed = isPressed;
+
     if (this.onPrimaryKeyChangeChallback) {
       this.onPrimaryKeyChangeChallback();
     }
