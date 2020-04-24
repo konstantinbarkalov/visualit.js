@@ -289,7 +289,7 @@ async function artStars() {
       drawLine(line, t);
     }
     basic.pie.main.setAlpha(1);
-    basic.pie.main.setColor(255, 255, 255);
+    basic.pie.main.setFillColor(255, 255, 255);
     basic.pie.main.print(10, basic.input.h - 10, t.toFixed(2));
     await basic.pause(dt * 1000);
   }
@@ -358,7 +358,7 @@ function drawStar(star, t) {
 
   for (let layerId = 0; layerId < intense; layerId++) {
     const factor = layerId + 1;
-    basic.pie.main.setColor(star.style.color.r * factor, star.style.color.g * factor, star.style.color.b * factor);
+    basic.pie.main.setFillColor(star.style.color.r * factor, star.style.color.g * factor, star.style.color.b * factor);
     fillStarShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
   }
 }
@@ -385,7 +385,7 @@ function drawDust(star, t) {
     const tweakedIntense = Math.pow(intense, 1/2);
     const plusSize = tweakedIntense / screenPoint.zScale * 1.5;
     basic.pie.main.setAlpha(tweakedIntense);
-    basic.pie.main.setColor(star.style.color.r, star.style.color.g, star.style.color.b);
+    basic.pie.main.setPlotColor(star.style.color.r, star.style.color.g, star.style.color.b);
     basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
     basic.pie.main.plotLine(screenPoint.coords.x - plusSize, screenPoint.coords.y, screenPoint.coords.x + plusSize, screenPoint.coords.y);
   }
@@ -421,7 +421,7 @@ function drawLine(line, t) {
   let wrapMarginRatio = Math.max(wrapMarginRatioFrom, wrapMarginRatioTo);
 
   basic.pie.main.setAlpha(tweakedIntense - wrapMarginRatio);
-  basic.pie.main.setColor(255, 255, 255);
+  basic.pie.main.setPlotColor(255, 255, 255);
   basic.pie.main.plotLine(screenPointFrom.coords.x, screenPointFrom.coords.y, screenPointTo.coords.x, screenPointTo.coords.y);
 }
 

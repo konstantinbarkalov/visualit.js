@@ -5,7 +5,8 @@ class VisualitCanvas {
     this.ctx = this.canvasDom.getContext('2d');
     this.offscreenCanvasDom = new OffscreenCanvas(0, 0);
     this.offscreenCtx = this.offscreenCanvasDom.getContext('2d');
-    this.colorName = null; // via this.basic.setColor
+    this.fillColorName = null; // via this.basic.setColor
+    this.plotColorName = null; // via this.basic.setColor
     this.alpha = null; // via this.basic.setAlpha
     this.lineWidth = null; // via this.basic.setLineWidth
     window.addEventListener('resize', () => {
@@ -26,16 +27,21 @@ class VisualitCanvas {
     this.initStyle();
   }
   initStyle() {
-    this.ctx.strokeStyle = this.colorName;
-    this.ctx.fillStyle = this.colorName;
+    this.ctx.strokeStyle = this.plotColorName;
+    this.ctx.fillStyle = this.fillColorName;
     this.ctx.globalAlpha = this.alpha;
     this.ctx.lineWidth = this.lineWidth;
   }
-  updateColor(colorName) {
-    if (this.colorName !== colorName) {
-      this.colorName = colorName;
-      this.ctx.strokeStyle = this.colorName;
-      this.ctx.fillStyle = this.colorName;
+  updateFillColor(colorName) {
+    if (this.fillColorName !== colorName) {
+      this.fillColorName = colorName;
+      this.ctx.fillStyle = this.fillColorName;
+    }
+  }
+  updatePlotColor(colorName) {
+    if (this.plotColorName !== colorName) {
+      this.plotColorName = colorName;
+      this.ctx.strokeStyle = this.plotColorName;
     }
   }
   updateAlpha(alpha) {
@@ -90,7 +96,16 @@ class VisualitCanvas {
     },
     setColor: (r, g, b) => {
       const colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
-      this.updateColor(colorName);
+      this.updateFillColor(colorName);
+      this.updatePlotColor(colorName);
+    },
+    setFillColor: (r, g, b) => {
+      const colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
+      this.updateFillColor(colorName);
+    },
+    setPlotColor: (r, g, b) => {
+      const colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
+      this.updatePlotColor(colorName);
     },
     setAlpha: (alpha) => {
       alpha = this.clampAlpha(alpha);
