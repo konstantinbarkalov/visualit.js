@@ -1,7 +1,7 @@
-function artOriginalInit() {
+function artJuliaInit() {
 }
 
-function artOriginalIteration(t, dt) {
+function artJuliaIteration(t, dt) {
   const rnd = Math.random() * 100 - 50;
   const yShift = t * 10;
   basic.pie.main.cls();

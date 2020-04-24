@@ -78,7 +78,7 @@ class VisualitCanvas {
       this.ctx.stroke();
     },
     plotDot: (x, y) => {
-      this.basic.plotLine(x, y, x, y);
+      this.basic.plotLine(x - 0.5, y - 0.5, x + 0.5, y + 0.5);
     },
     print: (x, y, text) => {
       this.ctx.fillText(text, x, y);
