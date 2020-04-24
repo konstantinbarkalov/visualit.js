@@ -15,11 +15,18 @@ class UniquePolys {
 
 }
 class Point {
+  // everyCoord(callbackFn) {
+  //   const clone = this.clone();
+  //   clone.coords = Object.fromEntries(Object.entries(clone.coords).map(([coordKey, coordValue]) => {
+  //     return [coordKey, callbackFn(coordValue, coordKey)];
+  //   }));
+  //   return clone;
+  // }
   everyCoord(callbackFn) {
     const clone = this.clone();
-    clone.coords = Object.fromEntries(Object.entries(clone.coords).map(([coordKey, coordValue]) => {
-      return [coordKey, callbackFn(coordValue, coordKey)];
-    }));
+    clone.coords.x = callbackFn(this.coords.x, 'x');
+    clone.coords.y = callbackFn(this.coords.y, 'y');
+    clone.coords.z = callbackFn(this.coords.z, 'z');
     return clone;
   }
   subtract(point) {
@@ -39,16 +46,13 @@ class Point {
   }
 }
 class Point2D extends Point {
-  coords = {
-    x: 0,
-    y: 0,
-    z: 0,
-  }
-  zScale = 1;
   constructor(x = 0, y = 0, zScale = 1) {
     super();
-    this.coords.x = x;
-    this.coords.y = y;
+    this.coords = {
+      x: x,
+      y: y,
+      z: 0,
+    }
     this.zScale = zScale;
   }
   clone() {
@@ -56,16 +60,13 @@ class Point2D extends Point {
   }
 }
 class Point3D extends Point {
-  coords = {
-    x: 0,
-    y: 0,
-    z: 0,
-  }
   constructor(x = 0, y = 0, z = 0) {
     super();
-    this.coords.x = x;
-    this.coords.y = y;
-    this.coords.z = z;
+    this.coords = {
+      x: x,
+      y: y,
+      z: z,
+    }
   }
   clone() {
     return new Point3D(this.coords.x, this.coords.y, this.coords.z);
@@ -87,19 +88,24 @@ class Point3D extends Point {
 class Camera {
   unitPlanePosition = new Point3D(0,0,0);
   dolly = 1;
+  scale = 1;
   mapToScreen(point3D) {
+    const scale3D = new Point3D(this.scale, this.scale, 1);
     const relativeToCamera = point3D.add(this.unitPlanePosition);
     const relativeToCameraCenter = relativeToCamera.subtract(fieldCenter);
-    const zScale = relativeToCameraCenter.getZScale(this.dolly);
-    const onScreenCenter = new Point2D(relativeToCameraCenter.coords.x * zScale, relativeToCameraCenter.coords.y * zScale, zScale);
+    const relativeToCameraCenterScaled = relativeToCameraCenter.multiply(scale3D);
+    const zScale = relativeToCameraCenterScaled.getZScale(this.dolly);
+    const onScreenCenter = new Point2D(relativeToCameraCenterScaled.coords.x * zScale, relativeToCameraCenterScaled.coords.y * zScale, zScale);
     const onScreen = onScreenCenter.add(screenCenter);
     return onScreen;
   }
 }
 class SmoothInput {
   decayPerSec = 0.8;
-  xRatio = 0;
-  yRatio = 0;
+  scrollBound = 1000;
+  xRatio = 0.5;
+  yRatio = 0.5;
+  scrollRatio = 0.5;
   constructor(decayPerSec = this.decayPerSec) {
     this.decayPerSec = decayPerSec;
   }
@@ -109,6 +115,11 @@ class SmoothInput {
     const decayFactor = 1 - remainsFactor;
     this.xRatio = this.xRatio * remainsFactor + basic.input.xRatio * decayFactor;
     this.yRatio = this.yRatio * remainsFactor + basic.input.yRatio * decayFactor;
+
+    const scrollBounded = Math.min(this.scrollBound, Math.max( - this.scrollBound, basic.input.scroll ));
+    basic.input.scroll = scrollBounded; //send back
+    const currentScrollRatio = scrollBounded / this.scrollBound / 2 + 0.5;
+    this.scrollRatio = this.scrollRatio * remainsFactor + currentScrollRatio * decayFactor;
   }
 }
 async function art() {
@@ -248,16 +259,21 @@ function sampleBlinkRatio(t, freq, phase) {
 async function artStars() {
   const randomStars = generateStars(300);
   const zodiacStars = generateZodiacStarsFromPolys(zodiacPolys);
-  const stars = randomStars.concat(zodiacStars);
+  const markStars = generateZodiacStarsFromPolys(markPolys); // debug TODO: remove
+  const stars = randomStars.concat(zodiacStars).concat(markStars);
   const dusts = generateStars(1000);
-  const lanes = generateZodiacLanesFromPolys(zodiacPolys);
+  const zodiacLanes = generateZodiacLanesFromPolys(zodiacPolys);
+  const markLanes = generateZodiacLanesFromPolys(markPolys); // debug TODO: remove
+  const lanes = zodiacLanes.concat(markLanes);
   const dt = 1 / 30;
   let t = 0;
   while(true) {
     smoothInput.iteration(dt);
-    //camera.dolly = 1 / (smoothInput.yRatio + 0.001);
-    camera.unitPlanePosition.coords.z = -1 + smoothInput.yRatio * 1;
-    camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800;
+    camera.dolly = 1 / (smoothInput.yRatio + 0.001);
+    camera.scale = Math.pow(2, smoothInput.scrollRatio - 0.5);
+    //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
+    camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
+
     basic.pie.main.cls();
     t += dt;
     for (let starId = 0; starId < stars.length; starId++) {
@@ -513,9 +529,22 @@ const fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
 const screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2);
 
 
+let markPolys = [ // debug TODO: remove
+  // [
+  //   new Point3D( 0, 0, 0 ),
+  //   new Point3D( 400, 0, 0 ),
+  //   new Point3D( 0, 400, 0 ),
+  // ],
+  // [
+  //   new Point3D( 0, basic.input.h, 0 ),
+  //   new Point3D( 400, basic.input.h, 0 ),
+  //   new Point3D( 0, basic.input.h - 400, 0 ),
+  // ],
+]
 
-const polysHeight = 500;
-const polysWidth = 500;
+
+const polysHeight = 400;
+const polysWidth = 400;
 zodiacPolys = shiftPolys(zodiacPolys, 0, 0, 0.0);
 zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - polysWidth) / 2, (fieldHeight - polysHeight) / 2, 0);
 zodiacPolys = ditherPolys(zodiacPolys);

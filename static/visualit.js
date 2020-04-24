@@ -5,13 +5,16 @@ class VisualitCanvas {
     this.ctx = this.canvasDom.getContext('2d');
     this.offscreenCanvasDom = new OffscreenCanvas(0, 0);
     this.offscreenCtx = this.offscreenCanvasDom.getContext('2d');
+    this.colorName = null; // via this.basic.setColor
+    this.alpha = null; // via this.basic.setAlpha
+    this.lineWidth = null; // via this.basic.setLineWidth
     window.addEventListener('resize', () => {
       this.onResize();
     });
     this.basic.setColor(0, 0, 255);
     this.basic.setAlpha(1);
     this.basic.setLineWidth(1);
-    this.onResize();
+    this.onResize(); // this.initStyle(); inside
   }
   onResize() {
     this.w = this.canvasContainerDom.clientWidth;
@@ -20,13 +23,32 @@ class VisualitCanvas {
     this.canvasDom.height = this.h;
     this.offscreenCanvasDom.width = this.w;
     this.offscreenCanvasDom.height = this.h;
-    this.updateStyle();
+    this.initStyle();
   }
-  updateStyle() {
+  initStyle() {
     this.ctx.strokeStyle = this.colorName;
     this.ctx.fillStyle = this.colorName;
-    this.ctx.globalAlpha = this.opacity;
+    this.ctx.globalAlpha = this.alpha;
     this.ctx.lineWidth = this.lineWidth;
+  }
+  updateColor(colorName) {
+    if (this.colorName !== colorName) {
+      this.colorName = colorName;
+      this.ctx.strokeStyle = this.colorName;
+      this.ctx.fillStyle = this.colorName;
+    }
+  }
+  updateAlpha(alpha) {
+    if (this.alpha !== alpha) {
+      this.alpha = alpha;
+      this.ctx.globalAlpha = alpha;
+    }
+  }
+  updateLineWidth(lineWidth) {
+    if (this.lineWidth !== lineWidth) {
+      this.lineWidth = lineWidth;
+      this.ctx.lineWidth = lineWidth;
+    }
   }
   clampChannel(c) {
     return Math.floor(Math.max(0, Math.min(255, c)));
@@ -61,22 +83,21 @@ class VisualitCanvas {
         this.ctx.clearRect(0, 0, this.w, this.h);
         this.ctx.globalAlpha = 1 - amount;
         this.ctx.drawImage(this.offscreenCanvasDom, 0, 0);
-        this.ctx.globalAlpha = this.opacity;
+        this.ctx.globalAlpha = this.alpha;
       } else {
         this.ctx.clearRect(0, 0, this.w, this.h);
       }
     },
     setColor: (r, g, b) => {
-      this.colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
-      this.updateStyle();
+      const colorName = `rgb(${this.clampChannel(r)}, ${this.clampChannel(g)}, ${this.clampChannel(b)})`;
+      this.updateColor(colorName);
     },
-    setAlpha: (opacity) => {
-      this.opacity = this.clampAlpha(opacity);
-      this.updateStyle();
+    setAlpha: (alpha) => {
+      alpha = this.clampAlpha(alpha);
+      this.updateAlpha(alpha);
     },
     setLineWidth: (lineWidth) => {
-      this.lineWidth = lineWidth;
-      this.updateStyle();
+      this.updateLineWidth(lineWidth);
     },
     fillRect: (xFrom, yFrom, xTo, yTo) => {
       this.ctx.fillRect(xFrom, yFrom, xTo - xFrom, yTo - yFrom);

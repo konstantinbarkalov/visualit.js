@@ -7,6 +7,9 @@ class VisualitInput {
     this.containerDom.addEventListener('mousemove', (e) => {
       this.onMouseMove(e.offsetX, e.offsetY);
     });
+    this.containerDom.addEventListener('mousewheel', (e) => {
+      this.onMouseScroll(e.wheelDelta);
+    });
     document.addEventListener('onkeydown', (e) => {
       if (e.code === 32) {
         this.onPrimaryKeyChange(true);
@@ -18,7 +21,8 @@ class VisualitInput {
       }
     });
     this.onResize();
-    this.onMouseMove(0, 0);
+    this.onMouseMove(this.basic.w / 2, this.basic.h / 2);
+    this.onMouseScrollReset();
     this.onPrimaryKeyChange(false);
   }
   basic = {
@@ -26,6 +30,7 @@ class VisualitInput {
     h: 0,
     x: 0,
     y: 0,
+    scroll: 0,
     xRatio: 0,
     yRatio: 0,
     isPrimaryPressed: false,
@@ -39,6 +44,12 @@ class VisualitInput {
     this.basic.x = x;
     this.basic.y = y;
     this.updateRatios();
+  }
+  onMouseScroll(delta) {
+    this.basic.scroll += delta;
+  }
+  onMouseScrollReset() {
+    this.basic.scroll = 0;
   }
   onPrimaryKeyChange(isPressed) {
     this.basic.isPrimaryPressed = isPressed;
