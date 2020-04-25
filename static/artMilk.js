@@ -349,7 +349,10 @@ function fillStarShape(x, y, exSize, plusSize) {
   ]);
 }
 function timeshift(point, t) {
-  const timeshiftedX = (point.coords.x + t * 100) % (fieldWidth);
+  let timeshiftedX = (point.coords.x - t * 100);
+  timeshiftedX %= fieldWidth;
+  timeshiftedX += fieldWidth;
+  timeshiftedX %= fieldWidth;
   const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
   return timeshiftedPoint;
 }

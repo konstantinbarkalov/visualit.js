@@ -213,7 +213,7 @@ class SparclePool {
           return isNoTooLong;
         })) {
           splitArray(trailScreenCoords, 5).forEach((sliceCoords, sliceId)=>{
-            basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 10);
+            basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 5);
             basic.pie.main.setLineWidth((sliceId + 1) * 1);
             basic.pie.main.plotPolyline(sliceCoords);
           })
