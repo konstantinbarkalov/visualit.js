@@ -139,7 +139,7 @@ function artMilkInit() {
 
   fieldWidth = basic.input.w + overscan;
   fieldHeight = basic.input.h;
-  fieldDepth = 2;
+  fieldDepth = 1000;
   fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
   screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2);
 
@@ -165,7 +165,7 @@ function artMilkInit() {
 }
 function artMilkIteration(t, dt) {
   smoothInput.iteration(dt);
-  camera.dolly = 1 / (smoothInput.yRatio + 0.001);
+  camera.dolly = 500 / (smoothInput.yRatio + 0.001);
   camera.scale = Math.pow(2, smoothInput.scrollRatio - 0.5);
   //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
   camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
