@@ -133,6 +133,7 @@ let extraZodiacPolys = [ // debug TODO: remove
 const camera = new Camera();
 const smoothInput = new SmoothInput();
 let sparclePool = null;
+let cubusPool = null;
 
 
 function artMilkInit() {
@@ -157,10 +158,11 @@ function artMilkInit() {
   lanes = zodiacLanes.concat(extraZodiacLanes);
 
   sparclePool = new SparclePool();
-  // for (let i = 0; i < 100; i++) {
-  //   sparclePool.addRandom();
-
-  // }
+  cubusPool = new CubusPool();
+  for (let i = 0; i < 25; i++) {
+    cubusPool.addRandom();
+    sparclePool.addRandom();
+  }
 
 }
 function artMilkIteration(t, dt) {
@@ -171,6 +173,7 @@ function artMilkIteration(t, dt) {
   camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
 
   basic.pie.main.cls();
+  basic.pie.extra.cls();
   basic.pie.main.setLineWidth(1);
   for (let starId = 0; starId < stars.length; starId++) {
     const star = stars[starId];
@@ -189,10 +192,14 @@ function artMilkIteration(t, dt) {
       const randomStarId = Math.floor(Math.random() * stars.length);
       const randomStar = stars[randomStarId];
       sparclePool.addRandomAtPos(randomStar.point.clone());
+      cubusPool.addRandomAtPos(randomStar.point.clone());
     }
   }
   sparclePool.iteration(t, dt);
   sparclePool.draw(t, dt);
+
+  cubusPool.iteration(t, dt);
+  cubusPool.draw(t, dt);
 
   basic.pie.main.setAlpha(1);
   basic.pie.main.setFillColor(255, 255, 255);
@@ -306,8 +313,8 @@ function sampleBurnWaveRatio(t, x, y, phaseShift, q) {
   burnWaveRatio = Math.pow(burnWaveRatio, q);
   return burnWaveRatio;
 }
-function sampleBlinkRatio(t, freq, phase) {
-  const blinkSinParam = Math.PI * 2 * (t * freq + phase);
+function sampleBlinkRatio(t, freq, phaseShift) {
+  const blinkSinParam = Math.PI * 2 * (t * freq + phaseShift);
   const blinkRatio = Math.sin(blinkSinParam) / 2 + 0.5;
   return blinkRatio;
 }
@@ -358,7 +365,7 @@ function timeshift(point, t) {
 }
 function drawStar(star, t) {
   const timeshiftedPoint = timeshift(star.point, t);
-  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
+  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);
   let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift, 50);
   burnWaveRatio *= star.style.entropy.burnWave.amount;
 
@@ -385,7 +392,7 @@ function drawStar(star, t) {
 function drawDust(star, t) {
   const timeshiftedPoint = timeshift(star.point, t);
 
-  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phase);
+  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);
   let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift - 0.1, 2);
   //burnWaveRatio *= star.style.entropy.burnWave.amount;
 
