@@ -55,7 +55,7 @@ class Point2D extends Point {
     this.zScale = zScale;
   }
   clone() {
-    return new Point2D(this.coords.x, this.coords.y);
+    return new Point2D(this.coords.x, this.coords.y, this.zScale);
   }
 }
 class Point3D extends Point {

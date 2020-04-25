@@ -74,7 +74,7 @@ class VisualitCanvas {
     },
     plotCircle: (x, y, radius) => {
       this.ctx.beginPath();
-      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.arc(x, y, Math.max(0, radius), 0, Math.PI * 2);
       this.ctx.stroke();
     },
     plotDot: (x, y) => {
@@ -119,7 +119,7 @@ class VisualitCanvas {
     },
     fillCircle: (x, y, radius) => {
       this.ctx.beginPath();
-      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.arc(x, y, Math.max(0, radius), 0, Math.PI * 2);
       this.ctx.fill();
     },
     plotPolyline: (coords, isLoop = false) => {

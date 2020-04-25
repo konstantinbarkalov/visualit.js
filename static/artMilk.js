@@ -134,6 +134,7 @@ const camera = new Camera();
 const smoothInput = new SmoothInput();
 let sparclePool = null;
 let cubusPool = null;
+let playerPool = null;
 
 
 function artMilkInit() {
@@ -159,9 +160,11 @@ function artMilkInit() {
 
   sparclePool = new SparclePool();
   cubusPool = new CubusPool();
+  playerPool = new PlayerPool();
   for (let i = 0; i < 25; i++) {
-    cubusPool.addRandom();
-    sparclePool.addRandom();
+    //cubusPool.addRandom();
+    //sparclePool.addRandom();
+    playerPool.addRandom();
   }
 
 }
@@ -170,7 +173,7 @@ function artMilkIteration(t, dt) {
   camera.dolly = 500 / (smoothInput.yRatio + 0.001);
   camera.scale = Math.pow(2, smoothInput.scrollRatio - 0.5);
   //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
-  camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
+  camera.unitPlanePosition.coords.x = - smoothInput.xRatio * 800 + 400;
 
   basic.pie.main.cls();
   basic.pie.extra.cls();
@@ -193,6 +196,7 @@ function artMilkIteration(t, dt) {
       const randomStar = stars[randomStarId];
       sparclePool.addRandomAtPos(randomStar.point.clone());
       cubusPool.addRandomAtPos(randomStar.point.clone());
+      playerPool.addRandomAtPos(randomStar.point.clone());
     }
   }
   sparclePool.iteration(t, dt);
@@ -200,6 +204,9 @@ function artMilkIteration(t, dt) {
 
   cubusPool.iteration(t, dt);
   cubusPool.draw(t, dt);
+
+  playerPool.iteration(t, dt);
+  playerPool.draw(t, dt);
 
   basic.pie.main.setAlpha(1);
   basic.pie.main.setFillColor(255, 255, 255);
