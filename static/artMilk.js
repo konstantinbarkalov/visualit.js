@@ -108,7 +108,7 @@ const zodiacPolysHeight = 400;
 const zodiacPolysWidth = 400;
 
 const unsafeMargin = 200;
-const overscan = 800;
+const overscan = 1800;
 let fieldWidth = null;
 let fieldHeight = null;
 let fieldDepth = null;
@@ -165,14 +165,16 @@ function artMilkInit() {
   for (let i = 0; i < 25; i++) {
     //cubusPool.addRandom();
     //sparclePool.addRandom();
-    playerPool.addRandom();
+    //playerPool.addRandom();
   }
 
 }
 function artMilkIteration(t, dt) {
+  //t /= 3;
+  //dt /= 3;
   smoothInput.iteration(dt);
-  camera.dolly = 500 / (smoothInput.yRatio + 0.001);
-  camera.scale = Math.pow(2, smoothInput.scrollRatio - 0.5);
+  camera.dolly = 500 / (smoothInput.scrollShiftRatio + 0.001);
+  camera.scale = Math.pow(2, smoothInput.scrollAltRatio - 0.5);
   //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
   camera.unitPlanePosition.coords.x = - smoothInput.xRatio * 800 + 400;
 
@@ -195,7 +197,7 @@ function artMilkIteration(t, dt) {
     for (let j = 0; j < 1; j++) {
       const randomStarId = Math.floor(Math.random() * stars.length);
       const randomStar = stars[randomStarId];
-      sparclePool.addRandomAtPos(randomStar.point.clone());
+      //sparclePool.addRandomAtPos(randomStar.point.clone());
       //cubusPool.addRandomAtPos(randomStar.point.clone());
       playerPool.addRandomAtPos(randomStar.point.clone());
     }
@@ -245,9 +247,9 @@ function ditherPolys(polys) {
   });
   uniquePolys.dictionary = Object.fromEntries(Object.entries(uniquePolys.dictionary).map(([uid, point]) => {
     return [uid, point.add(new Point3D(
-      Math.random() * !0 - 5,
       Math.random() * 10 - 5,
-      Math.random() * 0.4 - 0.2,
+      Math.random() * 10 - 5,
+      Math.random() * 400 - 200,
     ))];
   }));
 
@@ -364,10 +366,10 @@ function fillStarShape(x, y, exSize, plusSize) {
   ]);
 }
 function timeshift(point, t) {
-  let timeshiftedX = (point.coords.x - t * 100);
-  timeshiftedX %= fieldWidth;
-  timeshiftedX += fieldWidth;
-  timeshiftedX %= fieldWidth;
+  let timeshiftedX = (point.coords.x - t * 100 * 0);
+  //timeshiftedX %= fieldWidth;
+  //timeshiftedX += fieldWidth;
+  //timeshiftedX %= fieldWidth;
   const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
   return timeshiftedPoint;
 }

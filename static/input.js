@@ -11,12 +11,19 @@ class VisualitInput {
       this.onMouseScroll(e.wheelDelta);
     });
     document.addEventListener('keydown', (e) => {
+      if (e.which >= 16 && e.which <= 18) {
+        e.preventDefault();
+        this.onModificatorKeyChange(e.shiftKey, e.altKey, e.ctrlKey);
+      }
       if (e.which === 32) {
         e.preventDefault();
         this.onPrimaryKeyChange(true);
       }
     });
     document.addEventListener('keyup', (e) => {
+      if (e.which >= 16 && e.which <= 18) {
+        this.onModificatorKeyChange(e.shiftKey, e.altKey, e.ctrlKey);
+      }
       if (e.which === 32) {
         this.onPrimaryKeyChange(false);
       }
@@ -41,9 +48,15 @@ class VisualitInput {
     x: 0,
     y: 0,
     scroll: 0,
+    scrollAlt: 0,
+    scrollShift: 0,
+    scrollAltShift: 0,
     xRatio: 0,
     yRatio: 0,
     isPrimaryPressed: false,
+    isShiftPressed: false,
+    isAltPressed: false,
+    isCtrlPressed: false,
   }
   onResize() {
     this.basic.w = this.containerDom.clientWidth;
@@ -56,9 +69,20 @@ class VisualitInput {
     this.updateRatios();
   }
   onMouseScroll(delta) {
-    this.basic.scroll += delta;
+    if (this.basic.isAltPressed && this.basic.isShiftPressed) {
+      this.basic.scrollAltShift += delta;
+    } else if (this.basic.isAltPressed) {
+      this.basic.scrollAlt += delta;
+    } else if (this.basic.isShiftPressed) {
+      this.basic.scrollShift += delta;
+    } else {
+      this.basic.scroll += delta;
+    }
   }
   onMouseScrollReset() {
+    this.basic.scrollAltShift = 0;
+    this.basic.scrollAlt = 0;
+    this.basic.scrollShift = 0;
     this.basic.scroll = 0;
   }
   onPrimaryKeyChange(isPressed) {
@@ -66,6 +90,14 @@ class VisualitInput {
 
     if (this.onPrimaryKeyChangeChallback) {
       this.onPrimaryKeyChangeChallback();
+    }
+  }
+  onModificatorKeyChange(isShiftPressed, isAltPressed, isCtrlPressed) {
+    this.basic.isShiftPressed = isShiftPressed;
+    this.basic.isAltPressed = isAltPressed;
+    this.basic.isCtrlPressed = isCtrlPressed;
+    if (this.onModificatorKeyChangeChallback) {
+      this.onModificatorKeyChangeChallback();
     }
   }
   updateRatios() {

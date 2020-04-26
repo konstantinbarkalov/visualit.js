@@ -14,12 +14,12 @@ class Player {
   maxTrailLength = 150;
   style = {
     colors: {
-      main: {
+      primaryA: {
         r: Math.random() * 255,
         g: Math.random() * 255,
         b: Math.random() * 255,
       },
-      secondary: {
+      primaryB: {
         r: Math.random() * 255,
         g: Math.random() * 255,
         b: Math.random() * 255,
@@ -38,7 +38,12 @@ class Player {
     this.acc = acc;
     this.size = size;
   };
-  iteration(t, dt) {
+  iteration(t, dt, cursorProjector) {
+    const diff = this.pos.subtract(cursorProjector.pos);
+    this.acc.coords.x = -diff.coords.x;
+    this.acc.coords.y = -diff.coords.y;
+    this.acc.coords.z = -diff.coords.z;
+
     this.vel.coords.x += this.acc.coords.x * dt;
     this.vel.coords.y += this.acc.coords.y * dt;
     this.vel.coords.z += this.acc.coords.z * dt;
@@ -65,7 +70,7 @@ class PlayerPool {
   }
   iteration(t, dt) {
     this.players.forEach((player) => {
-      player.iteration(t, dt);
+      player.iteration(t, dt, this.cursorProjector);
     });
     this.players = this.players.filter((player) => {
       if (!player.isAlive) {
@@ -122,6 +127,7 @@ class PlayerPool {
 
       const screenCircles = playerSpheres.map((sphere) => {
         let worldPos = sphere.pos;
+        worldPos = this.rotateY(worldPos, t * Math.PI * 2);
         worldPos = this.rotateX(worldPos, -angleB);
         worldPos = this.rotateZ(worldPos, angleA + Math.PI / 2);
 
@@ -179,6 +185,7 @@ class PlayerPool {
 }
 
 playerColorWhite = {r: 255, g: 255, b: 255};
+
 //
 //       ()
 //      `  `
@@ -192,23 +199,59 @@ const playerSpheres = [
 
   new PlayerSphere(new Point3D(  0,   0,   0),  16, playerColorWhite),
 
-  new PlayerSphere(new Point3D(  8,   4,   0),  8, 'main'),
-  new PlayerSphere(new Point3D( -8,   4,   0),  8, 'main'),
+  new PlayerSphere(new Point3D(  8,   4,   0),  7, 'primaryA'),
+  new PlayerSphere(new Point3D( -8,   4,   0),  7, 'primaryA'),
 
-  new PlayerSphere(new Point3D(  9,   8,   0),  8, 'main'),
-  new PlayerSphere(new Point3D( -9,   8,   0),  8, 'main'),
+  new PlayerSphere(new Point3D(  9,   8,   0),  8, 'primaryA'),
+  new PlayerSphere(new Point3D( -9,   8,   0),  8, 'primaryA'),
 
-  new PlayerSphere(new Point3D( 10,  12,   0),  8, 'main'),
-  new PlayerSphere(new Point3D(-10,  12,   0),  8, 'main'),
+  new PlayerSphere(new Point3D( 10,  12,   0),  8, 'primaryA'),
+  new PlayerSphere(new Point3D(-10,  12,   0),  8, 'primaryA'),
 
-  new PlayerSphere(new Point3D(  0,   4,   8),  8, 'secondary'),
-  new PlayerSphere(new Point3D(  0,   4,  -8),  8, 'secondary'),
 
-  new PlayerSphere(new Point3D(  0,   8,   9),  8, 'secondary'),
-  new PlayerSphere(new Point3D(  0,   8,  -9),  8, 'secondary'),
+  new PlayerSphere(new Point3D(  12,  10,  0),  6, 'primaryA'),
+  new PlayerSphere(new Point3D( -12,  10,  0),  6, 'primaryA'),
 
-  new PlayerSphere(new Point3D(  0,  12,  10),  8, 'secondary'),
-  new PlayerSphere(new Point3D(  0,  12, -10),  8, 'secondary'),
+  new PlayerSphere(new Point3D(  14,  14,  0),  6, 'primaryA'),
+  new PlayerSphere(new Point3D( -14,  14,  0),  6, 'primaryA'),
+
+
+  new PlayerSphere(new Point3D(  14,  12,  0),  4, 'primaryA'),
+  new PlayerSphere(new Point3D( -14,  12,  0),  4, 'primaryA'),
+
+  new PlayerSphere(new Point3D(  16,  14,  0),  4, 'primaryA'),
+  new PlayerSphere(new Point3D( -16,  14,  0),  4, 'primaryA'),
+
+  new PlayerSphere(new Point3D(  18,  16,  0),  4, 'primaryA'),
+  new PlayerSphere(new Point3D( -18,  16,  0),  4, 'primaryA'),
+
+
+  new PlayerSphere(new Point3D(  0,   4,   8),  7, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,   4,  -8),  7, 'primaryB'),
+
+  new PlayerSphere(new Point3D(  0,   8,   9),  8, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,   8,  -9),  8, 'primaryB'),
+
+  new PlayerSphere(new Point3D(  0,  12,  10),  8, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  12, -10),  8, 'primaryB'),
+
+
+  new PlayerSphere(new Point3D(  0,  10,  12),  6, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  10, -12),  6, 'primaryB'),
+
+  new PlayerSphere(new Point3D(  0,  14,  14),  6, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  14, -14),  6, 'primaryB'),
+
+
+  new PlayerSphere(new Point3D(  0,  12,  14),  4, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  12, -14),  4, 'primaryB'),
+
+  new PlayerSphere(new Point3D(  0,  14,  16),  4, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  14, -16),  4, 'primaryB'),
+
+  new PlayerSphere(new Point3D(  0,  16,  18),  4, 'primaryB'),
+  new PlayerSphere(new Point3D(  0,  16, -18),  4, 'primaryB'),
+
 
   new PlayerSphere(new Point3D( 12,  16,   0),  4, playerColorWhite),
   new PlayerSphere(new Point3D(-12,  16,   0),  4, playerColorWhite),
