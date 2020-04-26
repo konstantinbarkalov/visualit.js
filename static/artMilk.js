@@ -107,6 +107,7 @@ let zodiacPolys = null;
 const zodiacPolysHeight = 400;
 const zodiacPolysWidth = 400;
 
+const unsafeMargin = 200;
 const overscan = 800;
 let fieldWidth = null;
 let fieldHeight = null;
@@ -139,7 +140,7 @@ let playerPool = null;
 
 function artMilkInit() {
 
-  fieldWidth = basic.input.w + overscan;
+  fieldWidth = basic.input.w + overscan + unsafeMargin * 2;
   fieldHeight = basic.input.h;
   fieldDepth = 1000;
   fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
@@ -195,7 +196,7 @@ function artMilkIteration(t, dt) {
       const randomStarId = Math.floor(Math.random() * stars.length);
       const randomStar = stars[randomStarId];
       sparclePool.addRandomAtPos(randomStar.point.clone());
-      cubusPool.addRandomAtPos(randomStar.point.clone());
+      //cubusPool.addRandomAtPos(randomStar.point.clone());
       playerPool.addRandomAtPos(randomStar.point.clone());
     }
   }
@@ -459,3 +460,32 @@ function drawLine(line, t) {
   basic.pie.main.plotLine(screenPointFrom.coords.x, screenPointFrom.coords.y, screenPointTo.coords.x, screenPointTo.coords.y);
 }
 
+function isInField(point) {
+  return point.coords.x >= 0 &&
+         point.coords.x < fieldWidth &&
+         point.coords.y >= 0 &&
+         point.coords.y < fieldHeight &&
+         point.coords.z >= -fieldDepth / 2 &&
+         point.coords.z < fieldDepth / 2;
+}
+
+function isInSafeWidthZone(point) {
+  return point.coords.x >= unsafeMargin &&
+         point.coords.x < fieldWidth - unsafeMargin;
+}
+
+function isInSafeField(point) {
+  return point.coords.x >= unsafeMargin &&
+         point.coords.x < fieldWidth - unsafeMargin &&
+         point.coords.y >= 0 &&
+         point.coords.y < fieldHeight &&
+         point.coords.z >= -fieldDepth / 2 &&
+         point.coords.z < fieldDepth / 2;
+}
+
+function isInTube(point) {
+  return point.coords.y >= 0 &&
+         point.coords.y < fieldHeight &&
+         point.coords.z >= -fieldDepth / 2 &&
+         point.coords.z < fieldDepth / 2;
+}

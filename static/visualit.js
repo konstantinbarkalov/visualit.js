@@ -31,6 +31,7 @@ class VisualitCanvas {
     this.ctx.fillStyle = this.fillColorName;
     this.ctx.globalAlpha = this.alpha;
     this.ctx.lineWidth = this.lineWidth;
+    this.ctx.lineJoin='bevel';
   }
   updateFillColor(colorName) {
     if (this.fillColorName !== colorName) {

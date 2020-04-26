@@ -98,6 +98,16 @@ class Camera {
     const onScreen = onScreenCenter.add(screenCenter);
     return onScreen;
   }
+  mapToWorld(point2D, z) {
+    const scale3DInv = new Point3D(1 / this.scale, 1 / this.scale, 1);
+    const onScreenCenter = point2D.subtract(screenCenter);
+    const zScale = this.dolly / (this.dolly - z);
+    const onScreenCenter3D = new Point3D(onScreenCenter.coords.x / zScale, onScreenCenter.coords.y / zScale, z);
+    const onScreenCenter3DScaled = onScreenCenter3D.multiply(scale3DInv);
+    const relToCam = onScreenCenter3DScaled.add(fieldCenter);
+    const worldPoint = relToCam.subtract(this.unitPlanePosition);
+    return worldPoint;
+  }
 }
 class SmoothInput {
   decayPerSec = 0.8;
@@ -194,29 +204,34 @@ class SparclePool {
     this.add(pos, vel, acc);
   }
   draw(t, dt) {
-    basic.pie.main.setPlotColor(0,128,255);
+    //basic.pie.main.setPlotColor(0,128,255);
+    basic.pie.main.setPlotColor(255, 0, 0);
     //basic.pie.main.setAlpha(0.25);
+
+
+
+
     this.sparcles.forEach((sparcle) => {
-      const trailScreenCoords = sparcle.trail.map((worldCoords)=>{
-        const timeshiftedPoint = timeshift(worldCoords, t);
+      const trailScreenPoints = sparcle.trail.map((worldCoords, worldCoordsId)=>{
+        let timeshiftedPoint = timeshift(worldCoords, t);
         const screenPoint = camera.mapToScreen(timeshiftedPoint);
-        return screenPoint.coords;
+        return screenPoint;
       });
-      if (trailScreenCoords.length > 0) {
-        let prevCoords = trailScreenCoords[0];
-        if (trailScreenCoords.every((coords) => { // TODO: check just boundary
-          const simpleDistance = Math.abs(prevCoords.x - coords.x) +
-                                 Math.abs(prevCoords.y - coords.y) +
-                                 Math.abs(prevCoords.z - coords.z);
+      if (trailScreenPoints.length > 0) {
+        let prevCoords = trailScreenPoints[0].coords;
+        if (trailScreenPoints.every((point) => { // TODO: check just boundary
+          const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
+                                 Math.abs(prevCoords.y - point.coords.y) +
+                                 Math.abs(prevCoords.z - point.coords.z);
 
           const isNoTooLong = simpleDistance < 800;
-          prevCoords = coords;
+          prevCoords = point.coords;
           return isNoTooLong;
         })) {
-          splitArray(trailScreenCoords, 5).forEach((sliceCoords, sliceId)=>{
+          splitArray(trailScreenPoints, 5).forEach((slice, sliceId)=>{
             basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 5);
-            basic.pie.main.setLineWidth((sliceId + 1) * 1);
-            basic.pie.main.plotPolyline(sliceCoords);
+            basic.pie.main.setLineWidth((sliceId + 1) * 1 * slice[0].zScale);
+            basic.pie.main.plotPolyline(slice.map(point => point.coords));
           })
         }
       }
