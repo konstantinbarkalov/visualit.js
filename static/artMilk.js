@@ -211,10 +211,6 @@ function artMilkIteration(t, dt) {
   playerPool.iteration(t, dt);
   playerPool.draw(t, dt);
 
-  basic.pie.main.setAlpha(1);
-  basic.pie.main.setFillColor(255, 255, 255);
-  basic.pie.main.print(10, basic.input.h - 10, t.toFixed(2));
-
 }
 
 function gappedSinRatio(input, everyNth = 2) {
