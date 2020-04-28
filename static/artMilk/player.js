@@ -12,6 +12,9 @@ class PlayerSphere {
 class Player {
   trail = [];
   maxTrailLength = 150;
+  mass = 1;
+  maxPower = 100;
+  desireArivementTime = 0.5;
   style = {
     colors: {
       primaryA: {
@@ -42,13 +45,18 @@ class Player {
   };
   iteration(t, dt, cursorProjector) {
     const diff = this.pos.subtract(cursorProjector.pos);
-    this.acc.coords.x = -diff.coords.x;
-    this.acc.coords.y = -diff.coords.y;
-    this.acc.coords.z = -diff.coords.z;
+    const targetVel = diff.everyCoord((coord) => -coord / this.desireArivementTime);
+    const targetAcc = targetVel.subtract(this.vel).everyCoord(coord => coord / dt);
+    const targetAccLen = targetAcc.len();
+    const maxAccLen = this.maxPower / this.mass;
+    const accLen = Math.min(targetAccLen, maxAccLen);
+    const accLenCappingFactor = accLen / targetAccLen;
+    this.acc = targetAcc.everyCoord((coord) => coord * accLenCappingFactor);
 
     this.vel.coords.x += this.acc.coords.x * dt;
     this.vel.coords.y += this.acc.coords.y * dt;
     this.vel.coords.z += this.acc.coords.z * dt;
+    //this.vel = targetVel;
 
     this.pos.coords.x += this.vel.coords.x * dt;
     this.pos.coords.y += this.vel.coords.y * dt;
@@ -148,9 +156,9 @@ class PlayerPool {
   draw(t, dt) {
     this.players.forEach((player) => {
 
-      const angleA = Math.atan2(player.vel.coords.y, player.vel.coords.x);
-      const lenA = Math.sqrt(player.vel.coords.x**2 + player.vel.coords.y **2);
-      const angleB = Math.atan2(player.vel.coords.z, lenA);
+      const angleA = Math.atan2(player.acc.coords.y, player.acc.coords.x);
+      const lenA = Math.sqrt(player.acc.coords.x**2 + player.acc.coords.y **2);
+      const angleB = Math.atan2(player.acc.coords.z, lenA);
 
       const timeshiftedCenterPoint = timeshift(player.pos, t);
 
@@ -170,6 +178,9 @@ class PlayerPool {
 
       basic.pie.main.setAlpha(1);
 
+      const screenPlayerPoint = camera.mapToScreen(timeshiftedCenterPoint);
+      basic.pie.main.setColor(255,128,0);
+      basic.pie.main.print(screenPlayerPoint.coords.x + 100, screenPlayerPoint.coords.y + 100, player.acc.coords.x.toFixed(2));
       screenCircles.forEach((screenCircle)=>{
         let color = screenCircle.color;
         if (typeof color === 'string') {

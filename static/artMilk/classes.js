@@ -31,17 +31,24 @@ class Point {
   subtract(point) {
     return this.everyCoord((coordValue, coordKey)=>{
       return coordValue - point.coords[coordKey];
-    })
+    });
   }
   add(point) {
     return this.everyCoord((coordValue, coordKey)=>{
       return coordValue + point.coords[coordKey];
-    })
+    });
   }
   multiply(point) {
     return this.everyCoord((coordValue, coordKey)=>{
       return coordValue * point.coords[coordKey];
-    })
+    });
+  }
+  len() {
+    let magnitude = 0;
+    this.everyCoord((coordValue)=>{
+      magnitude += coordValue ** 2;
+    });
+    return Math.sqrt(magnitude);
   }
 }
 class Point2D extends Point {
