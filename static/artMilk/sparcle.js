@@ -34,7 +34,7 @@ class SparclePool {
     });
   }
   add(pos, vel, acc) {
-    const sparcle = new Sparcle(pos, vel, acc));
+    const sparcle = new Sparcle(pos, vel, acc);
     this.sparcles.push(sparcle);
     return sparcle;
   }
@@ -74,7 +74,7 @@ class SparclePool {
           prevCoords = point.coords;
           return isNoTooLong;
         })) {
-          splitArray(trailScreenPoints, 5).forEach((slice, sliceId)=>{
+          splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
             basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 5);
             basic.pie.main.setLineWidth((sliceId + 1) * 1 * slice[0].zScale);
             basic.pie.main.plotPolyline(slice.map(point => point.coords));

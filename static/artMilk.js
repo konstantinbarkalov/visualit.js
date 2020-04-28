@@ -1,3 +1,5 @@
+'use strict';
+
 let randomStars = null;
 let zodiacStars = null;
 let extraZodiacStars = null;
@@ -131,14 +133,18 @@ let extraZodiacPolys = [ // debug TODO: remove
 
 
 
-const camera = new Camera();
-const smoothInput = new SmoothInput();
+let camera = null;
+let smoothInput = null;
+let cursorProjector = null;
+let dustPool = null;
+let starPool = null;
 let sparclePool = null;
 let cubusPool = null;
 let playerPool = null;
-
+let starlanePool = null;
 
 function artMilkInit() {
+
 
   fieldWidth = basic.input.w + overscan + unsafeMargin * 2;
   fieldHeight = basic.input.h;
@@ -157,11 +163,16 @@ function artMilkInit() {
   extraZodiacLanes = generateZodiacLanesFromPolys(extraZodiacPolys); // debug TODO: remove
   lanes = zodiacLanes.concat(extraZodiacLanes);
 
+  camera = new Camera();
+  smoothInput = new SmoothInput();
+  cursorProjector = new CursorProjector();
+
   dustPool = new DustPool();
   starPool = new StarPool();
   sparclePool = new SparclePool();
   cubusPool = new CubusPool();
   playerPool = new PlayerPool();
+  starlanePool = new StarlanePool();
 
 
   for (let i = 0; i < 300; i++) {
@@ -204,7 +215,8 @@ function artMilkIteration(t, dt) {
       const randomStar = starPool.stars[randomStarId];
       //sparclePool.addRandomAtPos(randomstar.pos.clone());
       //cubusPool.addRandomAtPos(randomstar.pos.clone());
-      playerPool.addRandomAtPos(randomStar.pos.clone());
+
+      playerPool.addRandomAtPos(cursorProjector.pos.clone());
     }
   }
   starPool.iteration(t, dt);
@@ -221,5 +233,8 @@ function artMilkIteration(t, dt) {
 
   playerPool.iteration(t, dt);
   playerPool.draw(t, dt);
+
+  starlanePool.iteration(t, dt);
+  starlanePool.draw(t, dt);
 
 }

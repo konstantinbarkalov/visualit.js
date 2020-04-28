@@ -27,34 +27,38 @@ class StarlanePool {
   }
   add() {
     const starlane = new Starlane();
-    this.starlanes.push();
+    this.starlanes.push(starlane);
     return starlane;
   }
   draw(t, dt) {
+    basic.pie.main.setLineWidth(5);
     this.starlanes.forEach((starlane) => {
-      const timeshiftedPoint = timeshift(starlane.pos, t);
-      const blinkRatio = sampleBlinkRatio(t, starlane.style.entropy.blink.freq, starlane.style.entropy.blink.phaseShift);
-      let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, starlane.style.entropy.burnWave.phaseShift, 50);
-      burnWaveRatio *= starlane.style.entropy.burnWave.amount;
+      const intervals = splitArray(starlane.steps, 2, 1);
+      intervals.forEach(interval => {
+        if (interval.length === 2) {
+          const fromPos = interval[0];
+          const toPos = interval[1];
 
-      const screenPoint = camera.mapToScreen(timeshiftedPoint);
+          const timeshiftedPointFrom = timeshift(fromPos, t);
+          const timeshiftedPointTo = timeshift(toPos, t);
+          let burnWaveRatioFrom = sampleBurnWaveRatio(t, timeshiftedPointFrom.coords.x, timeshiftedPointFrom.coords.y, 0, 4);
+          let burnWaveRatioTo = sampleBurnWaveRatio(t, timeshiftedPointTo.coords.x, timeshiftedPointTo.coords.y, 0, 4);
+          let burnWaveRatio = Math.max( burnWaveRatioFrom,  burnWaveRatioTo);
 
-      //let intense = 0.4 * starlane.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-      let intense =
-        + 0.5 * starlane.style.intense
-        + 0.5 * blinkRatio
-        + 2 * burnWaveRatio;
-      const tweakedIntense1 = Math.pow(intense, 1/2);
-      const tweakedIntense2 = Math.pow(intense, 2);
-      const exSize = tweakedIntense2 * 4 * screenPoint.zScale;
-      const plusSize = tweakedIntense1 * 1 * screenPoint.zScale;
-      const alpha = tweakedIntense1 * 1;
-      basic.pie.main.setAlpha(alpha);
-      for (let layerId = 0; layerId < intense; layerId++) {
-        const factor = layerId + 1;
-        basic.pie.main.setFillColor(starlane.style.color.r * factor, starlane.style.color.g * factor, starlane.style.color.b * factor);
-        fillStarlaneShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
-      }
+          const screenPointFrom = camera.mapToScreen(timeshiftedPointFrom);
+          const screenPointTo = camera.mapToScreen(timeshiftedPointTo);
+
+          //let intense = 0.4 * starlane.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+          let intense =
+            + 0.5
+            + 2 * burnWaveRatio;
+          const alpha = intense;
+          basic.pie.main.setAlpha(alpha);
+          basic.pie.main.setColor(starlane.style.color.r * (1 + burnWaveRatio), starlane.style.color.g * (1 + burnWaveRatio), starlane.style.color.b * (1 + burnWaveRatio));
+          basic.pie.main.plotLine(screenPointFrom.coords.x, screenPointFrom.coords.y, screenPointTo.coords.x, screenPointTo.coords.y);
+        }
+      })
+
     });
   }
 }

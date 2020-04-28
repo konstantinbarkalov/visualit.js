@@ -26,6 +26,7 @@ class Player {
       },
     }
   }
+  starlane = null;
   isAlive = true;
   constructor(
     pos = new Point3D(),
@@ -37,6 +38,7 @@ class Player {
     this.vel = vel;
     this.acc = acc;
     this.size = size;
+    this.beginNewStarlane();
   };
   iteration(t, dt, cursorProjector) {
     const diff = this.pos.subtract(cursorProjector.pos);
@@ -55,14 +57,39 @@ class Player {
     this.trail.unshift(this.pos.clone());
     this.trail.splice(this.maxTrailLength);
 
+
+    if (this.starlane) {
+      if (Math.random() < 0.5) {
+        const starsSortedByDistance = starPool.stars.sort((a, b) => {
+          return Math.sqrt(
+            (a.pos.coords.x - this.pos.coords.x) ** 2 +
+            (a.pos.coords.y - this.pos.coords.y) ** 2 +
+            (a.pos.coords.z - this.pos.coords.z) ** 2
+          ) -
+          Math.sqrt(
+            (b.pos.coords.x - this.pos.coords.x) ** 2 +
+            (b.pos.coords.y - this.pos.coords.y) ** 2 +
+            (b.pos.coords.z - this.pos.coords.z) ** 2
+          )
+        })
+        const closestStar = starsSortedByDistance[0];
+        this.starlane.addStep(closestStar.pos.clone());
+      }
+    }
+
     if (!isInTube(this.pos)) {
       this.isAlive = false;
     };
   }
+  beginNewStarlane() {
+    this.starlane = starlanePool.add();
+  }
+  endCurrentStarlane() {
+    this.starlane = null;
+  }
 }
 class PlayerPool {
   players = [];
-  cursorProjector = new CursorProjector();
   fireDeath(player) {
     for (let i = 0; i < 10; i++) {
       sparclePool.addRandomAtPos(player.pos.clone());
@@ -70,7 +97,7 @@ class PlayerPool {
   }
   iteration(t, dt) {
     this.players.forEach((player) => {
-      player.iteration(t, dt, this.cursorProjector);
+      player.iteration(t, dt, cursorProjector);
     });
     this.players = this.players.filter((player) => {
       if (!player.isAlive) {
@@ -78,10 +105,10 @@ class PlayerPool {
       }
       return player.isAlive;
     });
-    this.cursorProjector.iteration(t, dt);
+    cursorProjector.iteration(t, dt);
   }
-  add(pos, vel, acc, size) {
-    const player = new Player(pos, vel, acc, size);
+  add(pos, vel, acc) {
+    const player = new Player(pos, vel, acc);
     this.players.push(player);
     return player;
   }
@@ -173,7 +200,7 @@ class PlayerPool {
           prevCoords = point.coords;
           return isNoTooLong;
         })) {
-          splitArray(trailScreenPoints, 5).forEach((slice, sliceId)=>{
+          splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
             basic.pie.main.setAlpha((30 - sliceId) / 30 / 3);
             basic.pie.main.setLineWidth((sliceId + 1) * 3 * slice[0].zScale);
             basic.pie.main.plotPolyline(slice.map(point => point.coords));
@@ -182,7 +209,7 @@ class PlayerPool {
       }
 
     });
-    this.cursorProjector.draw(t, dt);
+    cursorProjector.draw(t, dt);
   }
 }
 

@@ -1,9 +1,10 @@
 
-function splitArray(array, step) {
+function splitArray(array, partSize, overlap = 0) {
   const slices = [];
-  while (array.length > 0) {
-    slices.push(array.slice(0, step + 1));
-    array.splice(0, step);
+  const remains = array.slice();
+  while (remains.length > 0) {
+    slices.push(remains.slice(0, partSize));
+    remains.splice(0, partSize - overlap);
   }
   return slices;
 }
