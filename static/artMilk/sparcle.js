@@ -34,18 +34,20 @@ class SparclePool {
     });
   }
   add(pos, vel, acc) {
-    this.sparcles.push(new Sparcle(pos, vel, acc));
+    const sparcle = new Sparcle(pos, vel, acc));
+    this.sparcles.push(sparcle);
+    return sparcle;
   }
   addRandom() {
     const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
-    this.add(pos, vel, acc);
+    return this.add(pos, vel, acc);
   }
   addRandomAtPos(pos) {
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
-    this.add(pos, vel, acc);
+    return this.add(pos, vel, acc);
   }
   draw(t, dt) {
     //basic.pie.main.setPlotColor(0,128,255);

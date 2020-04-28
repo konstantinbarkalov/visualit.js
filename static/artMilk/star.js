@@ -35,16 +35,18 @@ class StarPool {
     // });
   }
   add(pos, intense) {
-    this.stars.push(new Star(pos, intense));
+    const star = new Star(pos, intense);
+    this.stars.push(star);
+    return star;
   }
   addRandom() {
     const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
     const intense = Math.random();
-    this.add(pos, intense);
+    return this.add(pos, intense);
   }
   addRandomAtPos(pos) {
     const intense = Math.random();
-    this.add(pos, intense);
+    return this.add(pos, intense);
   }
   draw(t, dt) {
     this.stars.forEach((star) => {

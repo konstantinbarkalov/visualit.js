@@ -46,7 +46,9 @@ class CubusPool {
     });
   }
   add(pos, vel, acc, size) {
-    this.cubuses.push(new Cubus(pos, vel, acc, size));
+    const cubus = new Cubus(pos, vel, acc, size)
+    this.cubuses.push(cubus);
+    return cubus;
   }
   addRandom() {
     const size = new Point3D(100,100,100);
@@ -55,7 +57,7 @@ class CubusPool {
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     const vel = new Point3D();
     const acc = new Point3D();
-    this.add(pos, vel, acc, size);
+    return this.add(pos, vel, acc, size);
   }
   addRandomAtPos(pos) {
     const size = new Point3D(100,100,100);
@@ -63,7 +65,7 @@ class CubusPool {
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     const vel = new Point3D();
     const acc = new Point3D();
-    this.add(pos, vel, acc, size);
+    return this.add(pos, vel, acc, size);
   }
   draw(t, dt) {
     basic.pie.extra.setLineWidth(2);

@@ -35,16 +35,18 @@ class DustPool {
     // });
   }
   add(pos, intense) {
-    this.dusts.push(new Dust(pos, intense));
+    const dust = new Dust(pos, intense);
+    this.dusts.push(dust);
+    return dust;
   }
   addRandom() {
     const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
     const intense = Math.random();
-    this.add(pos, intense);
+    return this.add(pos, intense);
   }
   addRandomAtPos(pos) {
     const intense = Math.random();
-    this.add(pos, intense);
+    return this.add(pos, intense);
   }
   draw(t, dt) {
     this.dusts.forEach((dust) => {

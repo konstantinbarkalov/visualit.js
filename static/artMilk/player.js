@@ -81,7 +81,9 @@ class PlayerPool {
     this.cursorProjector.iteration(t, dt);
   }
   add(pos, vel, acc, size) {
-    this.players.push(new Player(pos, vel, acc, size));
+    const player = new Player(pos, vel, acc, size);
+    this.players.push(player);
+    return player;
   }
   addRandom() {
     const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
@@ -89,14 +91,14 @@ class PlayerPool {
     const acc = new Point3D((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
     //const vel = new Point3D();
     //const acc = new Point3D();
-    this.add(pos, vel, acc);
+    return this.add(pos, vel, acc);
   }
   addRandomAtPos(pos) {
     const vel = new Point3D((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
     const acc = new Point3D((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
     //const vel = new Point3D();
     //const acc = new Point3D();
-    this.add(pos, vel, acc);
+    return this.add(pos, vel, acc);
   }
   rotateX(pos, angleDelta) {
     const posRotated = pos.clone();
