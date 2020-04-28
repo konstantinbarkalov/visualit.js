@@ -13,7 +13,7 @@ class Player {
   trail = [];
   maxTrailLength = 150;
   mass = 1;
-  maxPower = 100;
+  maxPower = 1000;
   desireArivementTime = 0.5;
   style = {
     colors: {

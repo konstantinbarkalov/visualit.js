@@ -142,6 +142,7 @@ let sparclePool = null;
 let cubusPool = null;
 let playerPool = null;
 let starlanePool = null;
+let axisDisplay = null;
 
 function artMilkInit() {
 
@@ -173,6 +174,7 @@ function artMilkInit() {
   cubusPool = new CubusPool();
   playerPool = new PlayerPool();
   starlanePool = new StarlanePool();
+  axisDisplay = new AxisDisplay();
 
 
   for (let i = 0; i < 300; i++) {
@@ -196,7 +198,10 @@ function artMilkIteration(t, dt) {
   //t /= 3;
   //dt /= 3;
   smoothInput.iteration(dt);
-  camera.dolly = 500 / (smoothInput.scrollShiftRatio + 0.001);
+  const epsilon = 0.001;
+  const minDolly = 500;
+  const correction = minDolly - minDolly / (1 + epsilon); // to ingnore epsilon influesnce of ratio = 1, to stick exactly to minDolly
+  camera.dolly = minDolly / (smoothInput.scrollShiftRatio + epsilon) + correction;
   camera.scale = Math.pow(2, smoothInput.scrollAltRatio - 0.5);
   //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
   camera.unitPlanePosition.coords.x = - smoothInput.xRatio * 800 + 400;
@@ -236,5 +241,8 @@ function artMilkIteration(t, dt) {
 
   starlanePool.iteration(t, dt);
   starlanePool.draw(t, dt);
+
+  axisDisplay.iteration(t, dt);
+  axisDisplay.draw(t, dt);
 
 }
