@@ -150,18 +150,30 @@ function artMilkInit() {
   zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - zodiacPolysWidth) / 2, (fieldHeight - zodiacPolysHeight) / 2, 0);
   zodiacPolys = ditherPolys(zodiacPolys);
 
-  randomStars = generateStars(300);
   zodiacStars = generateZodiacStarsFromPolys(zodiacPolys);
   extraZodiacStars = generateZodiacStarsFromPolys(extraZodiacPolys); // debug TODO: remove
-  stars = randomStars.concat(zodiacStars).concat(extraZodiacStars);
-  dusts = generateStars(1000);
+
   zodiacLanes = generateZodiacLanesFromPolys(zodiacPolys);
   extraZodiacLanes = generateZodiacLanesFromPolys(extraZodiacPolys); // debug TODO: remove
   lanes = zodiacLanes.concat(extraZodiacLanes);
 
+  dustPool = new DustPool();
+  starPool = new StarPool();
   sparclePool = new SparclePool();
   cubusPool = new CubusPool();
   playerPool = new PlayerPool();
+
+
+  for (let i = 0; i < 300; i++) {
+    starPool.addRandom();
+  }
+  starPool.stars = starPool.stars.concat(zodiacStars);
+  starPool.stars = starPool.stars.concat(extraZodiacStars);
+
+  for (let i = 0; i < 1000; i++) {
+    dustPool.addRandom();
+  }
+
   for (let i = 0; i < 25; i++) {
     //cubusPool.addRandom();
     //sparclePool.addRandom();
@@ -181,27 +193,26 @@ function artMilkIteration(t, dt) {
   basic.pie.main.cls();
   basic.pie.extra.cls();
   basic.pie.main.setLineWidth(1);
-  for (let starId = 0; starId < stars.length; starId++) {
-    const star = stars[starId];
-    drawStar(star, t);
-  }
-  for (let dustId = 0; dustId < dusts.length; dustId++) {
-    const dust = dusts[dustId];
-    drawDust(dust, t);
-  }
+
   for (let lineId = 0; lineId < lanes.length; lineId++) {
     const line = lanes[lineId];
     drawLine(line, t);
   }
   if (basic.input.isPrimaryPressed) {
     for (let j = 0; j < 1; j++) {
-      const randomStarId = Math.floor(Math.random() * stars.length);
-      const randomStar = stars[randomStarId];
-      //sparclePool.addRandomAtPos(randomStar.point.clone());
-      //cubusPool.addRandomAtPos(randomStar.point.clone());
-      playerPool.addRandomAtPos(randomStar.point.clone());
+      const randomStarId = Math.floor(Math.random() * starPool.stars.length);
+      const randomStar = starPool.stars[randomStarId];
+      //sparclePool.addRandomAtPos(randomstar.pos.clone());
+      //cubusPool.addRandomAtPos(randomstar.pos.clone());
+      playerPool.addRandomAtPos(randomStar.pos.clone());
     }
   }
+  starPool.iteration(t, dt);
+  starPool.draw(t, dt);
+
+  dustPool.iteration(t, dt);
+  dustPool.draw(t, dt);
+
   sparclePool.iteration(t, dt);
   sparclePool.draw(t, dt);
 
@@ -222,17 +233,7 @@ function gappedSinRatio(input, everyNth = 2) {
   }
 }
 
-function generateStars(starsCount) {
-  let stars = [];
-  for (let starId = 0; starId < starsCount; starId++) {
-    const star = new Star();
-    star.point.coords.x = Math.random() * fieldWidth;
-    star.point.coords.y = Math.random() * fieldHeight,
-    star.point.coords.z = (Math.random() - 0.5) * fieldDepth,
-    stars[starId] = star;
-  }
-  return stars;
-}
+
 
 function ditherPolys(polys) {
   const uniquePolys = new UniquePolys();
@@ -290,9 +291,9 @@ function generateZodiacStarsFromPolys(polys) {
   });
   const stars = Object.values(uniquePolys.dictionary).map((point) => {
     const star = new Star();
-    star.point.coords.x = point.coords.x;
-    star.point.coords.y = point.coords.y;
-    star.point.coords.z = point.coords.z;
+    star.pos.coords.x = point.coords.x;
+    star.pos.coords.y = point.coords.y;
+    star.pos.coords.z = point.coords.z;
     star.style.intense = 2 + Math.random(),
     star.style.entropy.burnWave = {
       amount: 1,
@@ -369,61 +370,7 @@ function timeshift(point, t) {
   const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
   return timeshiftedPoint;
 }
-function drawStar(star, t) {
-  const timeshiftedPoint = timeshift(star.point, t);
-  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);
-  let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift, 50);
-  burnWaveRatio *= star.style.entropy.burnWave.amount;
 
-  const screenPoint = camera.mapToScreen(timeshiftedPoint);
-
-  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-  let intense =
-    + 0.5 * star.style.intense
-    + 0.5 * blinkRatio
-    + 2 * burnWaveRatio;
-  const tweakedIntense1 = Math.pow(intense, 1/2);
-  const tweakedIntense2 = Math.pow(intense, 2);
-  const exSize = tweakedIntense2 * 4 * screenPoint.zScale;
-  const plusSize = tweakedIntense1 * 1 * screenPoint.zScale;
-  const alpha = tweakedIntense1 * 1;
-  basic.pie.main.setAlpha(alpha);
-
-  for (let layerId = 0; layerId < intense; layerId++) {
-    const factor = layerId + 1;
-    basic.pie.main.setFillColor(star.style.color.r * factor, star.style.color.g * factor, star.style.color.b * factor);
-    fillStarShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
-  }
-}
-function drawDust(star, t) {
-  const timeshiftedPoint = timeshift(star.point, t);
-
-  const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);
-  let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift - 0.1, 2);
-  //burnWaveRatio *= star.style.entropy.burnWave.amount;
-
-  const screenPoint = camera.mapToScreen(timeshiftedPoint);
-
-
-
-
-  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-  let intense =
-    + 0.5 * star.style.intense
-    + 0.5 * blinkRatio
-    + 2 * burnWaveRatio
-    - 1.1;
-
-  if (intense > 0) {
-    const tweakedIntense = Math.pow(intense, 1/2);
-    const plusSize = tweakedIntense / screenPoint.zScale * 1.5;
-    basic.pie.main.setAlpha(tweakedIntense);
-    basic.pie.main.setPlotColor(star.style.color.r, star.style.color.g, star.style.color.b);
-    basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
-    basic.pie.main.plotLine(screenPoint.coords.x - plusSize, screenPoint.coords.y, screenPoint.coords.x + plusSize, screenPoint.coords.y);
-  }
-
-}
 
 function drawLine(line, t) {
   const timeshiftedPointFrom = timeshift(line.from, t);
