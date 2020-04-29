@@ -19,23 +19,5 @@ class CursorProjector {
         });
         basic.pie.main.plotPolyline(screenPointsCoords);
       });
-
-
-
-
   }
 }
-cursorPolys = [
-  [
-    new Point3D(-20, 0 ,0),
-    new Point3D(20, 0 ,0),
-  ],
-  [
-    new Point3D(0, 20, 0),
-    new Point3D(0, -20, 0),
-  ],
-  [
-    new Point3D(0, 0, -20),
-    new Point3D(0, 0, 20),
-  ],
-]
