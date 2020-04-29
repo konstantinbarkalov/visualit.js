@@ -68,7 +68,7 @@ class DustPool {
     return dust;
   }
   addRandom() {
-    const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
+    const pos = new Point3D((Math.random() - 0.5) * fieldWidth, (Math.random() - 0.5) * fieldHeight, (Math.random() - 0.5) * fieldDepth);
     const intense = Math.random();
     return this.add(pos, intense);
   }

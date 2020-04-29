@@ -139,7 +139,9 @@ function fillStarShape(x, y, exSize, plusSize) {
   ]);
 }
 function timeshift(point, t) {
+  //let timeshiftedX = (point.coords.x - t * 100);
   let timeshiftedX = (point.coords.x - t * 100 * 0);
+  //let timeshiftedX = (point.coords.x - Math.sin(t / 3) * 100);
   //timeshiftedX %= fieldWidth;
   //timeshiftedX += fieldWidth;
   //timeshiftedX %= fieldWidth;
@@ -148,31 +150,32 @@ function timeshift(point, t) {
 }
 
 function isInField(point) {
-  return point.coords.x >= 0 &&
-         point.coords.x < fieldWidth &&
-         point.coords.y >= 0 &&
-         point.coords.y < fieldHeight &&
+  return point.coords.x >= -fieldWidth / 2 &&
+         point.coords.x < fieldWidth / 2 &&
+         point.coords.y >= -fieldHeight / 2 &&
+         point.coords.y < fieldHeight / 2 &&
          point.coords.z >= -fieldDepth / 2 &&
          point.coords.z < fieldDepth / 2;
 }
 
 function isInSafeWidthZone(point) {
-  return point.coords.x >= unsafeMargin &&
-         point.coords.x < fieldWidth - unsafeMargin;
+  return point.coords.x >= -fieldWidth / 2 + unsafeMargin &&
+         point.coords.x < fieldWidth / 2 - unsafeMargin;
 }
 
 function isInSafeField(point) {
-  return point.coords.x >= unsafeMargin &&
-         point.coords.x < fieldWidth - unsafeMargin &&
-         point.coords.y >= 0 &&
-         point.coords.y < fieldHeight &&
+  return point.coords.x >= -fieldWidth / 2 + unsafeMargin &&
+         point.coords.x < fieldWidth / 2 - unsafeMargin &&
+         point.coords.y >= -fieldHeight / 2 &&
+         point.coords.y < fieldHeight / 2 &&
          point.coords.z >= -fieldDepth / 2 &&
          point.coords.z < fieldDepth / 2;
 }
 
 function isInTube(point) {
-  return point.coords.y >= 0 &&
-         point.coords.y < fieldHeight &&
+  return point.coords.y >= -fieldHeight / 2 &&
+         point.coords.y < fieldHeight / 2 &&
          point.coords.z >= -fieldDepth / 2 &&
          point.coords.z < fieldDepth / 2;
+
 }

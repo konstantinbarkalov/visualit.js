@@ -30,11 +30,11 @@ function artMilkInit() {
   fieldWidth = basic.input.w + overscan + unsafeMargin * 2;
   fieldHeight = basic.input.h;
   fieldDepth = 1000;
-  fieldCenter = new Point3D(fieldWidth / 2, fieldHeight / 2, 0);
+  fieldCenter = new Point3D(0, 0, 0);
   screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2);
 
   zodiacPolys = shiftPolys(idealZodiacPolys, 0, 0, 0.0);
-  zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - zodiacPolysWidth) / 2, (fieldHeight - zodiacPolysHeight) / 2, 0);
+  zodiacPolys = shiftPolys(zodiacPolys, - zodiacPolysWidth / 2, - zodiacPolysHeight / 2, 0);
   zodiacPolys = ditherPolys(zodiacPolys);
 
   const zodiacStarsAndLanes = generateZodiacStarsAndLanesFromPolys(zodiacPolys);

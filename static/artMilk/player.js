@@ -188,7 +188,7 @@ class PlayerPool {
     return player;
   }
   addRandom() {
-    const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
+    const pos = new Point3D((Math.random() - 0.5) * fieldWidth, (Math.random() - 0.5) * fieldHeight, (Math.random() - 0.5) * fieldDepth);
     const vel = new Point3D((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
     const acc = new Point3D((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
     //const vel = new Point3D();

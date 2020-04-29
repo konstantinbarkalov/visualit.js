@@ -139,7 +139,7 @@ class CubusPool {
   }
   addRandom() {
     const size = new Point3D(40,40,40);
-    const pos = new Point3D(Math.random() * fieldWidth * 0.2 + fieldWidth * 0.4, Math.random() * fieldHeight * 0.2 + fieldHeight * 0.4, (Math.random() - 0.5) * fieldDepth * 0.2);
+    const pos = new Point3D((Math.random() - 0.5) * fieldWidth * 0.2, (Math.random() - 0.5) * fieldHeight * 0.2, (Math.random() - 0.5) * fieldDepth * 0.2);
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const vel = new Point3D();

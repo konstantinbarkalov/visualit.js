@@ -59,8 +59,8 @@ class AxisDisplay {
     });
     if (!isInField(cursorProjector.pos)) {
 
-      const axisFieldBoundWorldUpLeft = new Point2D();
-      const axisFieldBoundWorldDownRight = new Point2D(fieldWidth, fieldHeight);
+      const axisFieldBoundWorldUpLeft = new Point2D(-fieldWidth / 2, -fieldHeight / 2);
+      const axisFieldBoundWorldDownRight = new Point2D(fieldWidth / 2, fieldHeight / 2);
 
       const axisFieldBoxPolys = this.generateBoxPolys(axisFieldBoundWorldUpLeft, axisFieldBoundWorldDownRight);
 
