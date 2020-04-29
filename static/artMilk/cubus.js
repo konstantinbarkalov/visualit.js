@@ -24,9 +24,33 @@ class Cubus {
   phisicIteration(t, dt) {
     this.ttl -= dt;
     const ttlRatio = this.ttl / this.maxTtl;
-    this.vel.coords.x += this.acc.coords.x * dt;
-    this.vel.coords.y += this.acc.coords.y * dt;
-    this.vel.coords.z += this.acc.coords.z * dt;
+
+    playerPool.players.forEach(player => {
+      if (this.isPointWithin(player.pos)) {
+        this.ttl = 0;
+        for (let i = 0; i < 10; i++) {
+          sparclePool.addRandomAtPos(this.pos.clone());
+
+        }
+      };
+    })
+    const sortedPlayers = playerPool.players.sort((a, b) => {
+      return this.pos.subtract(a).mag() - this.pos.subtract(b).mag();
+    });
+    const closestPlayer = sortedPlayers[0];
+    if (closestPlayer) {
+      const diff = closestPlayer.pos.subtract(this.pos);
+      //this.acc = diff.everyCoord((coord) => coord * 1);
+      const desiredVel = diff;
+      const desiredSpeed = desiredVel.len();
+      const desiredDirection = desiredVel.everyCoord((coord)=> coord / desiredSpeed );
+      const maxSpeed = 25;
+      this.vel = desiredDirection.everyCoord((coord)=> coord * maxSpeed );
+    }
+
+    //this.vel.coords.x += this.acc.coords.x * dt;
+    //this.vel.coords.y += this.acc.coords.y * dt;
+    //this.vel.coords.z += this.acc.coords.z * dt;
     this.pos.coords.x += this.vel.coords.x * dt;
     this.pos.coords.y += this.vel.coords.y * dt;
     this.pos.coords.z += this.vel.coords.z * dt;
@@ -79,6 +103,21 @@ class Cubus {
       basic.pie.extra.plotPolyline(screenPoligon, true);
     });
 
+  }
+  isPointWithin(point) {
+    const diff = this.pos.subtract(point);
+    return Math.abs(diff.coords.x) < this.size.coords.x / 2 &&
+           Math.abs(diff.coords.y) < this.size.coords.y / 2 &&
+           Math.abs(diff.coords.z) < this.size.coords.z / 2;
+  }
+  isIntervalCrossing(pointFrom, pointTo) {
+    //const diff = pointTo.subtract(pointFrom);
+    const diff = this.pos.subtract(pointFrom);
+    // TODO
+
+    return Math.abs(diff.coords.x) < this.size.coords.x / 2 &&
+           Math.abs(diff.coords.y) < this.size.coords.y / 2 &&
+           Math.abs(diff.coords.z) < this.size.coords.z / 2;
   }
 }
 

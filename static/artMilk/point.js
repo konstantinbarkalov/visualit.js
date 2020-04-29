@@ -1,56 +1,72 @@
-class Point {
+class AbstactPoint {
   // everyCoord(callbackFn) {
-  //   const clone = this.clone();
-  //   clone.coords = Object.fromEntries(Object.entries(clone.coords).map(([coordKey, coordValue]) => {
-  //     return [coordKey, callbackFn(coordValue, coordKey)];
-  //   }));
-  //   return clone;
+  //   throw new Error('Unimplemented');
   // }
-  everyCoord(callbackFn) {
-    const clone = this.clone();
-    clone.coords.x = callbackFn(this.coords.x, 'x');
-    clone.coords.y = callbackFn(this.coords.y, 'y');
-    clone.coords.z = callbackFn(this.coords.z, 'z');
-    return clone;
-  }
+  // everyCoordForEach(callbackFn) {
+  //   throw new Error('Unimplemented');
+  // }
+  // everyCoordForPoint(point, callbackFn) {
+  //   throw new Error('Unimplemented');
+  // }
+  // clone() {
+  //   throw new Error('Unimplemented');
+  // }
   subtract(point) {
-    return this.everyCoord((coordValue, coordKey) => {
-      return coordValue - point.coords[coordKey];
+    return this.everyCoordForPoint(point, (a, b) => {
+      return a - b;
     });
   }
   add(point) {
-    return this.everyCoord((coordValue, coordKey) => {
-      return coordValue + point.coords[coordKey];
+    return this.everyCoordForPoint(point, (a, b) => {
+      return a + b;
     });
   }
   multiply(point) {
-    return this.everyCoord((coordValue, coordKey) => {
-      return coordValue * point.coords[coordKey];
+    return this.everyCoordForPoint(point, (a, b) => {
+      return a * b;
     });
   }
   len() {
+    return Math.sqrt(this.mag());
+  }
+  mag() {
     let magnitude = 0;
-    this.everyCoord((coordValue) => {
+    this.everyCoordForEach((coordValue) => {
       magnitude += coordValue ** 2;
     });
-    return Math.sqrt(magnitude);
+    return magnitude;
   }
 }
-class Point2D extends Point {
+class Point2D extends AbstactPoint {
   constructor(x = 0, y = 0, zScale = 1) {
     super();
     this.coords = {
       x: x,
       y: y,
-      z: 0,
     }
     this.zScale = zScale;
   }
   clone() {
     return new Point2D(this.coords.x, this.coords.y, this.zScale);
   }
+  everyCoord(callbackFn) {
+    const clone = this.clone();
+    clone.coords.x = callbackFn(this.coords.x, 'x');
+    clone.coords.y = callbackFn(this.coords.y, 'y');
+    return clone;
+  }
+  everyCoordForEach(callbackFn) {
+    callbackFn(this.coords.x, 'x');
+    callbackFn(this.coords.y, 'y');
+  }
+  everyCoordForPoint(point, callbackFn) {
+    const clone = this.clone();
+    clone.coords.x = callbackFn(this.coords.x, point.coords.x, 'x');
+    clone.coords.y = callbackFn(this.coords.y, point.coords.y, 'y');
+    return clone;
+  }
 }
-class Point3D extends Point {
+class Point3D extends AbstactPoint {
   constructor(x = 0, y = 0, z = 0) {
     super();
     this.coords = {
@@ -61,6 +77,25 @@ class Point3D extends Point {
   }
   clone() {
     return new Point3D(this.coords.x, this.coords.y, this.coords.z);
+  }
+  everyCoord(callbackFn) {
+    const clone = this.clone();
+    clone.coords.x = callbackFn(this.coords.x, 'x');
+    clone.coords.y = callbackFn(this.coords.y, 'y');
+    clone.coords.z = callbackFn(this.coords.z, 'z');
+    return clone;
+  }
+  everyCoordForEach(callbackFn) {
+    callbackFn(this.coords.x, 'x');
+    callbackFn(this.coords.y, 'y');
+    callbackFn(this.coords.z, 'z');
+  }
+  everyCoordForPoint(point, callbackFn) {
+    const clone = this.clone();
+    clone.coords.x = callbackFn(this.coords.x, point.coords.x, 'x');
+    clone.coords.y = callbackFn(this.coords.y, point.coords.y, 'y');
+    clone.coords.z = callbackFn(this.coords.z, point.coords.z, 'z');
+    return clone;
   }
   getZScale(zScaleBase) {
     //    |
@@ -92,5 +127,31 @@ class Point3D extends Point {
     posRotated.coords.x = Math.cos(angleDelta) * this.coords.x - Math.sin(angleDelta) * this.coords.y;
     posRotated.coords.y = Math.sin(angleDelta) * this.coords.x + Math.cos(angleDelta) * this.coords.y;
     return posRotated;
+  }
+}
+class AngularPoint2D {
+  constructor(r = 0, a = 0, zScale = 1) {
+    this.coords = {
+      r: r,
+      a: a,
+    }
+    this.zScale = zScale;
+  }
+  clone() {
+    return new AngularPoint2D(this.coords.r, this.coords.a, this.zScale);
+  }
+  toCartesian() {
+    const r = this.coords.r;
+    const a = this.coords.a;
+    const x = r * Math.cos(a);
+    const y = r * Math.sin(a);
+    return new Point2D(x, y, this.zScale);
+  }
+  static fromCartesian(cartesianPoint2D) {
+    const x = cartesianPoint2D.coords.x;
+    const y = cartesianPoint2D.coords.y;
+    const r = Math.sqrt(x**2 + y**2);
+    const a = Math.atan2(y, x);
+    return new AngularPoint2D(r, a, this.zScale);
   }
 }

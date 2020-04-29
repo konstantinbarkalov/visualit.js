@@ -1,19 +1,19 @@
 async function art() {
   artInit();
   let t = 0;
-  const idealFps = 30;
+  const idealFps = 60;
   const idealDt = 1 / idealFps;
-  let prevIterationStartSysTime = Date.now() / 1000;
+  let prevIterationStartSysTime = performance.now() / 1000;
   let prevDutyRatio = 0.5;
   while(true) {
-    const iterationStartSysTime = Date.now() / 1000;
+    const iterationStartSysTime = performance.now() / 1000;
     const dt = iterationStartSysTime - prevIterationStartSysTime;
     t = t + dt;
 
     artIteration(t, dt);
     artDrawStatistic(t, dt, prevDutyRatio);
 
-    const iterationEndSysTime = Date.now() / 1000;
+    const iterationEndSysTime = performance.now() / 1000;
     const dutyDt = iterationEndSysTime - iterationStartSysTime;
     prevDutyRatio = dutyDt / idealDt;
     const pauseDt = Math.max(0, (idealDt - dutyDt));

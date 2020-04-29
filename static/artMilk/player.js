@@ -149,8 +149,7 @@ class Player {
       let prevCoords = trailScreenPoints[0].coords;
       if (trailScreenPoints.every((point) => { // TODO: check just boundary
         const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
-                               Math.abs(prevCoords.y - point.coords.y) +
-                               Math.abs(prevCoords.z - point.coords.z);
+                               Math.abs(prevCoords.y - point.coords.y);
 
         const isNoTooLong = simpleDistance < 800;
         prevCoords = point.coords;
