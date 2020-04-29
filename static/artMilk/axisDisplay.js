@@ -111,6 +111,22 @@ class AxisDisplay {
         basic.pie.main.plotCircle(screenPoint.coords.x, screenPoint.coords.y, sliceRadius * screenPoint.zScale);
       };
     });
+    cubusPool.cubuses.forEach(cubus => {
+      const axisScreenCubusSideShadowPolys = this.generateCubusSideShadowPolys(axisScreenBoundWorldUpLeft, axisScreenBoundWorldDownRight, cubus);
+      axisScreenCubusSideShadowPolys.forEach((axisPoly) => {
+        const timeshiftedAxisPoly = axisPoly.map((point)=>{
+          return timeshift(point, t);
+        })
+        const screenAxisPoly = timeshiftedAxisPoly.map((point)=>{
+          return camera.mapToScreen(point);
+        })
+        const screenAxisPolyCoords = screenAxisPoly.map(point => point.coords);
+        basic.pie.main.setAlpha(1);
+        basic.pie.main.setColor(cubus.style.color.r, cubus.style.color.g, cubus.style.color.b);
+        basic.pie.main.setLineWidth(1);
+        basic.pie.main.plotPolyline(screenAxisPolyCoords);
+      });
+    });
   }
   generateSideRollerPolys(upLeftPoint2D, downRightPoint2D) {
     return [
@@ -207,5 +223,52 @@ class AxisDisplay {
       ],
     ];
   }
+  generateCubusSideShadowPolys(upLeftPoint2D, downRightPoint2D, cubus) {
+    return [
+      [ // box bottom side
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+      ],
+      [ // box top side
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+      ],
+      [ // box left side
+        new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y + cubus.size.coords.y / 2, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y + cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+      ],
+      [ // box up side
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, upLeftPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, upLeftPoint2D.coords.y, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, upLeftPoint2D.coords.y, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, upLeftPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, upLeftPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+      ],
+      [ // box right side
+        new Point3D(downRightPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(downRightPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(downRightPoint2D.coords.x, cubus.pos.coords.y + cubus.size.coords.y / 2, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(downRightPoint2D.coords.x, cubus.pos.coords.y + cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(downRightPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
+      ],
+      [ // box down side
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, downRightPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, downRightPoint2D.coords.y, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, downRightPoint2D.coords.y, cubus.pos.coords.z + cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, downRightPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, downRightPoint2D.coords.y, cubus.pos.coords.z - cubus.size.coords.z / 2),
+      ],
+    ];
+  }
 }
+
 

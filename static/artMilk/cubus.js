@@ -51,8 +51,8 @@ class CubusPool {
     return cubus;
   }
   addRandom() {
-    const size = new Point3D(100,100,100);
-    const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
+    const size = new Point3D(40,40,40);
+    const pos = new Point3D(Math.random() * fieldWidth * 0.2 + fieldWidth * 0.4, Math.random() * fieldHeight * 0.2 + fieldHeight * 0.4, (Math.random() - 0.5) * fieldDepth * 0.2 + fieldDepth * 0.4);
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const vel = new Point3D();
@@ -60,7 +60,7 @@ class CubusPool {
     return this.add(pos, vel, acc, size);
   }
   addRandomAtPos(pos) {
-    const size = new Point3D(100,100,100);
+    const size = new Point3D(40,40,40);
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const vel = new Point3D();
@@ -72,14 +72,14 @@ class CubusPool {
     this.cubuses.forEach((cubus) => {
       const timeshiftedCenterPoint = timeshift(cubus.pos, t);
       const wordVertices = [
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x, +cubus.size.coords.y, +cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x, -cubus.size.coords.y, +cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x, -cubus.size.coords.y, +cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x, +cubus.size.coords.y, +cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x, +cubus.size.coords.y, -cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x, -cubus.size.coords.y, -cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x, -cubus.size.coords.y, -cubus.size.coords.z)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x, +cubus.size.coords.y, -cubus.size.coords.z)),
+        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, +cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, -cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, -cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, +cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, +cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, -cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, -cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
+        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, +cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
       ]
       const poligonsVertexIds = [
         [0, 1, 2, 3],
@@ -105,7 +105,7 @@ class CubusPool {
 
       const blinkRatio = Math.sin(cubus.blinkPhase * Math.PI * 2) / 2 + 0.5;
       const ttlRatio = cubus.ttl / cubus.maxTtl;
-      basic.pie.extra.setAlpha(0.1 * ttlRatio);
+      basic.pie.extra.setAlpha(0.2 * ttlRatio);
       screenPoligons.forEach((screenPoligon)=>{
         basic.pie.extra.fillPolygon(screenPoligon);
       })

@@ -4,7 +4,7 @@ class CursorProjector {
   iteration(t, dt) {
     const screenPoint = new Point2D(basic.input.x, basic.input.y);
     this.pos = camera.mapToWorld(screenPoint, this.targetZ);
-    this.targetZ = (smoothInput.scrollRatio - 0.5) * fieldDepth *0.9;
+    this.targetZ = (smoothInput.scrollRatio - 0.5) * fieldDepth * -1;
   }
   draw(t, dt) {
     basic.pie.main.setAlpha(1);

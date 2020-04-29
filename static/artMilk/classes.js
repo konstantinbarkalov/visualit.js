@@ -90,6 +90,24 @@ class Point3D extends Point {
 
     return zScaleBase / (zScaleBase - this.coords.z);
   }
+  rotateX(angleDelta) {
+    const posRotated = this.clone();
+    posRotated.coords.y = Math.cos(angleDelta) * this.coords.y - Math.sin(angleDelta) * this.coords.z;
+    posRotated.coords.z = Math.sin(angleDelta) * this.coords.y + Math.cos(angleDelta) * this.coords.z;
+    return posRotated;
+  }
+  rotateY(angleDelta) {
+    const posRotated = this.clone();
+    posRotated.coords.x = Math.cos(angleDelta) * this.coords.x - Math.sin(angleDelta) * this.coords.z;
+    posRotated.coords.z = Math.sin(angleDelta) * this.coords.x + Math.cos(angleDelta) * this.coords.z;
+    return posRotated;
+  }
+  rotateZ(angleDelta) {
+    const posRotated = this.clone();
+    posRotated.coords.x = Math.cos(angleDelta) * this.coords.x - Math.sin(angleDelta) * this.coords.y;
+    posRotated.coords.y = Math.sin(angleDelta) * this.coords.x + Math.cos(angleDelta) * this.coords.y;
+    return posRotated;
+  }
 }
 class Camera {
   unitPlanePosition = new Point3D(0,0,0);

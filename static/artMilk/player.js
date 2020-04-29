@@ -43,7 +43,7 @@ class Player {
     this.size = size;
     this.beginNewStarlane();
   };
-  iteration(t, dt, cursorProjector) {
+  iteration(t, dt) {
     const diff = this.pos.subtract(cursorProjector.pos);
     const targetVel = diff.everyCoord((coord) => -coord / this.desireArivementTime);
     const targetAcc = targetVel.subtract(this.vel).everyCoord(coord => coord / dt);
@@ -81,7 +81,11 @@ class Player {
           )
         })
         const closestStar = starsSortedByDistance[0];
-        this.starlane.addStep(closestStar.pos.clone());
+        const lastStar = this.starlane.steps[this.starlane.steps.length];
+        if (lastStar !== closestStar) {
+          this.starlane.addStep(closestStar);
+        }
+        this.starlane.hotEndPoint = this.pos;
       }
     }
 
@@ -105,7 +109,7 @@ class PlayerPool {
   }
   iteration(t, dt) {
     this.players.forEach((player) => {
-      player.iteration(t, dt, cursorProjector);
+      player.iteration(t, dt);
     });
     this.players = this.players.filter((player) => {
       if (!player.isAlive) {
@@ -113,7 +117,6 @@ class PlayerPool {
       }
       return player.isAlive;
     });
-    cursorProjector.iteration(t, dt);
   }
   add(pos, vel, acc) {
     const player = new Player(pos, vel, acc);
@@ -135,24 +138,7 @@ class PlayerPool {
     //const acc = new Point3D();
     return this.add(pos, vel, acc);
   }
-  rotateX(pos, angleDelta) {
-    const posRotated = pos.clone();
-    posRotated.coords.y = Math.cos(angleDelta) * pos.coords.y - Math.sin(angleDelta) * pos.coords.z;
-    posRotated.coords.z = Math.sin(angleDelta) * pos.coords.y + Math.cos(angleDelta) * pos.coords.z;
-    return posRotated;
-  }
-  rotateY(pos, angleDelta) {
-    const posRotated = pos.clone();
-    posRotated.coords.x = Math.cos(angleDelta) * pos.coords.x - Math.sin(angleDelta) * pos.coords.z;
-    posRotated.coords.z = Math.sin(angleDelta) * pos.coords.x + Math.cos(angleDelta) * pos.coords.z;
-    return posRotated;
-  }
-  rotateZ(pos, angleDelta) {
-    const posRotated = pos.clone();
-    posRotated.coords.x = Math.cos(angleDelta) * pos.coords.x - Math.sin(angleDelta) * pos.coords.y;
-    posRotated.coords.y = Math.sin(angleDelta) * pos.coords.x + Math.cos(angleDelta) * pos.coords.y;
-    return posRotated;
-  }
+
   draw(t, dt) {
     this.players.forEach((player) => {
       const directionCoords = player.vel.coords;
@@ -164,9 +150,9 @@ class PlayerPool {
 
       const screenCircles = playerSpheres.map((sphere) => {
         let worldPos = sphere.pos;
-        worldPos = this.rotateY(worldPos, t * Math.PI * 2);
-        worldPos = this.rotateX(worldPos, -angleB);
-        worldPos = this.rotateZ(worldPos, angleA + Math.PI / 2);
+        worldPos = worldPos.rotateY(t * Math.PI * 2);
+        worldPos = worldPos.rotateX(-angleB);
+        worldPos = worldPos.rotateZ(angleA + Math.PI / 2);
 
         const timeshiftedWorldPos = timeshiftedCenterPoint.add(worldPos);
         const screenPoint = camera.mapToScreen(timeshiftedWorldPos);
@@ -220,7 +206,6 @@ class PlayerPool {
       }
 
     });
-    cursorProjector.draw(t, dt);
   }
 }
 

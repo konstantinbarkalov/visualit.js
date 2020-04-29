@@ -187,7 +187,7 @@ function artMilkInit() {
     dustPool.addRandom();
   }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 2; i++) {
     cubusPool.addRandom();
     //sparclePool.addRandom();
     //playerPool.addRandom();
@@ -221,9 +221,12 @@ function artMilkIteration(t, dt) {
       //sparclePool.addRandomAtPos(randomstar.pos.clone());
       //cubusPool.addRandomAtPos(randomstar.pos.clone());
 
-      playerPool.addRandomAtPos(cursorProjector.pos.clone());
+      if (playerPool.players.length === 0) {
+        playerPool.addRandomAtPos(cursorProjector.pos.clone());
+      };
     }
   }
+
   starPool.iteration(t, dt);
   starPool.draw(t, dt);
 
@@ -244,5 +247,8 @@ function artMilkIteration(t, dt) {
 
   axisDisplay.iteration(t, dt);
   axisDisplay.draw(t, dt);
+
+  cursorProjector.iteration(t, dt);
+  cursorProjector.draw(t, dt);
 
 }
