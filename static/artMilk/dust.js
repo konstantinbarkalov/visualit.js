@@ -26,9 +26,9 @@ class Dust {
 
 class DustPool {
   dusts = [];
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     // this.dusts.forEach((dust) => {
-    //   dust.iteration(t, dt);
+    //   dust.phisicIteration(t, dt);
     // });
     // this.dusts = this.dusts.filter((dust) => {
     //   return dust.ttl > 0;
@@ -48,7 +48,7 @@ class DustPool {
     const intense = Math.random();
     return this.add(pos, intense);
   }
-  draw(t, dt) {
+  drawIteration(t, dt) {
     this.dusts.forEach((dust) => {
       const timeshiftedPoint = timeshift(dust.pos, t);
 

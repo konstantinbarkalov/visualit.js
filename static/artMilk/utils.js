@@ -51,41 +51,34 @@ function shiftPolys(polys, dX, dY, dZ) {
   });
   return newPolys;
 }
-function generateZodiacLanesFromPolys(polys) {
-  let lanes = [];
-  polys.forEach((poly) => {
-    let prevPoint = poly[0];
-    for (let polyId = 1; polyId < poly.length; polyId++) {
-      const currentPoint = poly[polyId];
-      lanes.push({
-        from: prevPoint,
-        to: currentPoint,
-      });
-      prevPoint = currentPoint;
-    }
-  });
-  return lanes;
-}
-function generateZodiacStarsFromPolys(polys) {
-  const uniquePolys = new UniquePolys();
+
+function generateZodiacStarsAndLanesFromPolys(polys) {
+  const uniqueStars = new UniquePolys();
   polys.forEach((poly) => {
     poly.forEach((point) => {
-      uniquePolys.addValue(point, point);
+      const star = new Star();
+      star.pos.coords.x = point.coords.x;
+      star.pos.coords.y = point.coords.y;
+      star.pos.coords.z = point.coords.z;
+      star.style.intense = 2 + Math.random(),
+      star.style.entropy.burnWave = {
+        amount: 1,
+        phaseShift: 0,
+      }
+      uniqueStars.addValue(point, star);
     });
   });
-  const stars = Object.values(uniquePolys.dictionary).map((point) => {
-    const star = new Star();
-    star.pos.coords.x = point.coords.x;
-    star.pos.coords.y = point.coords.y;
-    star.pos.coords.z = point.coords.z;
-    star.style.intense = 2 + Math.random(),
-    star.style.entropy.burnWave = {
-      amount: 1,
-      phaseShift: 0,
-    }
-    return star;
+  const stars = Object.values(uniqueStars.dictionary);
+
+  const starlanes = polys.map((poly) => {
+    const laneStars = poly.map((point) => {
+      return uniqueStars.getValue(point);
+    });
+    const starlane =  new Starlane(laneStars);
+    starlane.style.color = {r: 255, g: 255, b: 255};
+    return starlane;
   });
-  return stars;
+  return {stars, starlanes};
 }
 
 function sampleBurnWaveRatio(t, x, y, phaseShift, q) {
@@ -152,39 +145,6 @@ function timeshift(point, t) {
   //timeshiftedX %= fieldWidth;
   const timeshiftedPoint = new Point3D(timeshiftedX, point.coords.y, point.coords.z);
   return timeshiftedPoint;
-}
-
-function drawLine(line, t) {
-  const timeshiftedPointFrom = timeshift(line.from, t);
-  const screenPointFrom = camera.mapToScreen(timeshiftedPointFrom);
-
-  const timeshiftedPointTo = timeshift(line.to, t);
-  const screenPointTo = camera.mapToScreen(timeshiftedPointTo);
-
-  let burnWaveRatioFrom = sampleBurnWaveRatio(t, timeshiftedPointFrom.coords.x, timeshiftedPointFrom.coords.y, 0, 3);
-  let burnWaveRatioTo = sampleBurnWaveRatio(t, timeshiftedPointTo.coords.x, timeshiftedPointTo.coords.y, 0, 3);
-  let burnWaveRatio = Math.max(burnWaveRatioFrom, burnWaveRatioTo);
-
-  //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-  let intense =
-    + 1 * burnWaveRatio
-    + 0.2;
-
-  const tweakedIntense = Math.pow(intense, 1);
-
-  let wrapMarginRatioFrom = Math.max(
-    Math.max(0, (100 - screenPointFrom.coords.x) / 100),
-    Math.max(0, (screenPointFrom.coords.x - basic.input.w + 100) / 100),
-  );
-  let wrapMarginRatioTo = Math.max(
-      Math.max(0, (100 - screenPointTo.coords.x) / 100),
-      Math.max(0, (screenPointTo.coords.x - basic.input.w + 100) / 100),
-    );
-  let wrapMarginRatio = Math.max(wrapMarginRatioFrom, wrapMarginRatioTo);
-
-  basic.pie.main.setAlpha(tweakedIntense - wrapMarginRatio);
-  basic.pie.main.setPlotColor(255, 255, 255);
-  basic.pie.main.plotLine(screenPointFrom.coords.x, screenPointFrom.coords.y, screenPointTo.coords.x, screenPointTo.coords.y);
 }
 
 function isInField(point) {

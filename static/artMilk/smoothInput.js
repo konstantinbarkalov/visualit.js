@@ -10,7 +10,7 @@ class SmoothInput {
   constructor(decayPerSec = this.decayPerSec) {
     this.decayPerSec = decayPerSec;
   }
-  iteration(dt) {
+  phisicIteration(dt) {
     const remainsPerSec = 1 - this.decayPerSec;
     const remainsFactor = Math.pow(remainsPerSec, dt);
     const decayFactor = 1 - remainsFactor;

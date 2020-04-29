@@ -26,9 +26,9 @@ class Star {
 
 class StarPool {
   stars = [];
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     // this.stars.forEach((star) => {
-    //   star.iteration(t, dt);
+    //   star.phisicIteration(t, dt);
     // });
     // this.stars = this.stars.filter((star) => {
     //   return star.ttl > 0;
@@ -48,7 +48,7 @@ class StarPool {
     const intense = Math.random();
     return this.add(pos, intense);
   }
-  draw(t, dt) {
+  drawIteration(t, dt) {
     this.stars.forEach((star) => {
       const timeshiftedPoint = timeshift(star.pos, t);
       const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);

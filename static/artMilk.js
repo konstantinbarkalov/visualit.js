@@ -2,12 +2,7 @@
 
 let randomStars = null;
 let zodiacStars = null;
-let extraZodiacStars = null;
-let stars = null;
-let dusts = null;
 let zodiacLanes = null;
-let extraZodiacLanes = null;
-let lanes = null;
 
 
 const idealZodiacPolys = [
@@ -118,18 +113,6 @@ let fieldCenter = null;
 let screenCenter = null;
 
 
-let extraZodiacPolys = [ // debug TODO: remove
-  // [
-  //   new Point3D( 0, 0, 0 ),
-  //   new Point3D( 400, 0, 0 ),
-  //   new Point3D( 0, 400, 0 ),
-  // ],
-  // [
-  //   new Point3D( 0, basic.input.h, 0 ),
-  //   new Point3D( 400, basic.input.h, 0 ),
-  //   new Point3D( 0, basic.input.h - 400, 0 ),
-  // ],
-]
 
 
 
@@ -157,12 +140,10 @@ function artMilkInit() {
   zodiacPolys = shiftPolys(zodiacPolys, (fieldWidth - zodiacPolysWidth) / 2, (fieldHeight - zodiacPolysHeight) / 2, 0);
   zodiacPolys = ditherPolys(zodiacPolys);
 
-  zodiacStars = generateZodiacStarsFromPolys(zodiacPolys);
-  extraZodiacStars = generateZodiacStarsFromPolys(extraZodiacPolys); // debug TODO: remove
+  const zodiacStarsAndLanes = generateZodiacStarsAndLanesFromPolys(zodiacPolys);
+  zodiacStars = zodiacStarsAndLanes.stars;
+  zodiacLanes = zodiacStarsAndLanes.starlanes;
 
-  zodiacLanes = generateZodiacLanesFromPolys(zodiacPolys);
-  extraZodiacLanes = generateZodiacLanesFromPolys(extraZodiacPolys); // debug TODO: remove
-  lanes = zodiacLanes.concat(extraZodiacLanes);
 
   camera = new Camera();
   smoothInput = new SmoothInput();
@@ -181,7 +162,7 @@ function artMilkInit() {
     starPool.addRandom();
   }
   starPool.stars = starPool.stars.concat(zodiacStars);
-  starPool.stars = starPool.stars.concat(extraZodiacStars);
+  starlanePool.staticStarlanes = starlanePool.staticStarlanes.concat(zodiacLanes);
 
   for (let i = 0; i < 1000; i++) {
     dustPool.addRandom();
@@ -197,7 +178,7 @@ function artMilkInit() {
 function artMilkIteration(t, dt) {
   //t /= 3;
   //dt /= 3;
-  smoothInput.iteration(dt);
+  smoothInput.phisicIteration(dt);
   const epsilon = 0.001;
   const minDolly = 500;
   const correction = minDolly - minDolly / (1 + epsilon); // to ingnore epsilon influesnce of ratio = 1, to stick exactly to minDolly
@@ -208,12 +189,7 @@ function artMilkIteration(t, dt) {
 
   basic.pie.main.cls();
   basic.pie.extra.cls();
-  basic.pie.main.setLineWidth(1);
 
-  for (let lineId = 0; lineId < lanes.length; lineId++) {
-    const line = lanes[lineId];
-    drawLine(line, t);
-  }
   if (basic.input.isPrimaryPressed) {
     for (let j = 0; j < 1; j++) {
       const randomStarId = Math.floor(Math.random() * starPool.stars.length);
@@ -227,28 +203,28 @@ function artMilkIteration(t, dt) {
     }
   }
 
-  starPool.iteration(t, dt);
-  starPool.draw(t, dt);
+  starPool.phisicIteration(t, dt);
+  starPool.drawIteration(t, dt);
 
-  dustPool.iteration(t, dt);
-  dustPool.draw(t, dt);
+  dustPool.phisicIteration(t, dt);
+  dustPool.drawIteration(t, dt);
 
-  sparclePool.iteration(t, dt);
-  sparclePool.draw(t, dt);
+  sparclePool.phisicIteration(t, dt);
+  sparclePool.drawIteration(t, dt);
 
-  cubusPool.iteration(t, dt);
-  cubusPool.draw(t, dt);
+  cubusPool.phisicIteration(t, dt);
+  cubusPool.drawIteration(t, dt);
 
-  playerPool.iteration(t, dt);
-  playerPool.draw(t, dt);
+  playerPool.phisicIteration(t, dt);
+  playerPool.drawIteration(t, dt);
 
-  starlanePool.iteration(t, dt);
-  starlanePool.draw(t, dt);
+  starlanePool.phisicIteration(t, dt);
+  starlanePool.drawIteration(t, dt);
 
-  axisDisplay.iteration(t, dt);
-  axisDisplay.draw(t, dt);
+  axisDisplay.phisicIteration(t, dt);
+  axisDisplay.drawIteration(t, dt);
 
-  cursorProjector.iteration(t, dt);
-  cursorProjector.draw(t, dt);
+  cursorProjector.phisicIteration(t, dt);
+  cursorProjector.drawIteration(t, dt);
 
 }

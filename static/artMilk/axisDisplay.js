@@ -1,9 +1,9 @@
 class AxisDisplay {
   stars = [];
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
   }
 
-  draw(t, dt) {
+  drawIteration(t, dt) {
     const margin = 10;
     const axisScreenBoundScreenUpLeft = new Point2D(margin, margin);
     const axisScreenBoundScreenDownRight = new Point2D(basic.input.w - margin, basic.input.h - margin);
@@ -225,20 +225,20 @@ class AxisDisplay {
   }
   generateCubusSideShadowPolys(upLeftPoint2D, downRightPoint2D, cubus) {
     return [
-      [ // box bottom side
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
-      ],
-      [ // box top side
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
-        new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
-      ],
+      // [ // box bottom side
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, -fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, -fieldDepth / 2),
+      // ],
+      // [ // box top side
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x + cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y + cubus.size.coords.y / 2, fieldDepth / 2),
+      //   new Point3D(cubus.pos.coords.x - cubus.size.coords.x / 2, cubus.pos.coords.y - cubus.size.coords.y / 2, fieldDepth / 2),
+      // ],
       [ // box left side
         new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z - cubus.size.coords.z / 2),
         new Point3D(upLeftPoint2D.coords.x, cubus.pos.coords.y - cubus.size.coords.y / 2, cubus.pos.coords.z + cubus.size.coords.z / 2),

@@ -43,7 +43,7 @@ class Player {
     this.size = size;
     this.beginNewStarlane();
   };
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     const diff = this.pos.subtract(cursorProjector.pos);
     const targetVel = diff.everyCoord((coord) => -coord / this.desireArivementTime);
     const targetAcc = targetVel.subtract(this.vel).everyCoord(coord => coord / dt);
@@ -81,9 +81,9 @@ class Player {
           )
         })
         const closestStar = starsSortedByDistance[0];
-        const lastStar = this.starlane.steps[this.starlane.steps.length];
+        const lastStar = this.starlane.stars[this.starlane.stars.length];
         if (lastStar !== closestStar) {
-          this.starlane.addStep(closestStar);
+          this.starlane.addStar(closestStar);
         }
         this.starlane.hotEndPoint = this.pos;
       }
@@ -94,7 +94,7 @@ class Player {
     };
   }
   beginNewStarlane() {
-    this.starlane = starlanePool.add();
+    this.starlane = starlanePool.createPlayerStarlane();
   }
   endCurrentStarlane() {
     this.starlane = null;
@@ -107,9 +107,9 @@ class PlayerPool {
       sparclePool.addRandomAtPos(player.pos.clone());
     }
   }
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     this.players.forEach((player) => {
-      player.iteration(t, dt);
+      player.phisicIteration(t, dt);
     });
     this.players = this.players.filter((player) => {
       if (!player.isAlive) {
@@ -139,7 +139,7 @@ class PlayerPool {
     return this.add(pos, vel, acc);
   }
 
-  draw(t, dt) {
+  drawIteration(t, dt) {
     this.players.forEach((player) => {
       const directionCoords = player.vel.coords;
       const angleA = Math.atan2(directionCoords.y, directionCoords.x);

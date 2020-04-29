@@ -21,7 +21,7 @@ class Cubus {
   ;
   ttl = 60;
   maxTtl = 60;
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     this.ttl -= dt;
     const ttlRatio = this.ttl / this.maxTtl;
     this.vel.coords.x += this.acc.coords.x * dt;
@@ -37,9 +37,9 @@ class Cubus {
 
 class CubusPool {
   cubuses = [];
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     this.cubuses.forEach((cubus) => {
-      cubus.iteration(t, dt);
+      cubus.phisicIteration(t, dt);
     });
     this.cubuses = this.cubuses.filter((cubus) => {
       return cubus.ttl > 0;
@@ -52,7 +52,7 @@ class CubusPool {
   }
   addRandom() {
     const size = new Point3D(40,40,40);
-    const pos = new Point3D(Math.random() * fieldWidth * 0.2 + fieldWidth * 0.4, Math.random() * fieldHeight * 0.2 + fieldHeight * 0.4, (Math.random() - 0.5) * fieldDepth * 0.2 + fieldDepth * 0.4);
+    const pos = new Point3D(Math.random() * fieldWidth * 0.2 + fieldWidth * 0.4, Math.random() * fieldHeight * 0.2 + fieldHeight * 0.4, (Math.random() - 0.5) * fieldDepth * 0.2);
     const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const vel = new Point3D();
@@ -67,7 +67,7 @@ class CubusPool {
     const acc = new Point3D();
     return this.add(pos, vel, acc, size);
   }
-  draw(t, dt) {
+  drawIteration(t, dt) {
     basic.pie.extra.setLineWidth(2);
     this.cubuses.forEach((cubus) => {
       const timeshiftedCenterPoint = timeshift(cubus.pos, t);

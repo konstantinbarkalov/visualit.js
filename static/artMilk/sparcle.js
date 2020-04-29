@@ -9,7 +9,7 @@ class Sparcle {
   maxTtl = 5;
   trail = [];
   maxTrailLength = 150;
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     this.ttl -= dt;
     this.vel.coords.x += this.acc.coords.x * dt;
     this.vel.coords.y += this.acc.coords.y * dt;
@@ -25,9 +25,9 @@ class Sparcle {
 
 class SparclePool {
   sparcles = [];
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     this.sparcles.forEach((sparcle) => {
-      sparcle.iteration(t, dt);
+      sparcle.phisicIteration(t, dt);
     });
     this.sparcles = this.sparcles.filter((sparcle) => {
       return sparcle.ttl > 0;
@@ -49,7 +49,7 @@ class SparclePool {
     const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     return this.add(pos, vel, acc);
   }
-  draw(t, dt) {
+  drawIteration(t, dt) {
     //basic.pie.main.setPlotColor(0,128,255);
     basic.pie.main.setPlotColor(255, 0, 0);
     //basic.pie.main.setAlpha(0.25);

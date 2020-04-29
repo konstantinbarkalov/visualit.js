@@ -1,12 +1,12 @@
 class CursorProjector {
   pos = new Point3D();
   targetZ = 500;
-  iteration(t, dt) {
+  phisicIteration(t, dt) {
     const screenPoint = new Point2D(basic.input.x, basic.input.y);
     this.pos = camera.mapToWorld(screenPoint, this.targetZ);
     this.targetZ = (smoothInput.scrollRatio - 0.5) * fieldDepth * -1;
   }
-  draw(t, dt) {
+  drawIteration(t, dt) {
     basic.pie.main.setAlpha(1);
     basic.pie.main.setPlotColor(255, 128, 255);
     basic.pie.main.setLineWidth(2);
