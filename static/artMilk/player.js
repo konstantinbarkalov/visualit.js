@@ -13,7 +13,7 @@ class Player {
   trail = [];
   maxTrailLength = 150;
   mass = 1;
-  maxPower = 1000;
+  maxPower = 100;
   desireArivementTime = 0.5;
   style = {
     colors: {
@@ -155,10 +155,10 @@ class PlayerPool {
   }
   draw(t, dt) {
     this.players.forEach((player) => {
-
-      const angleA = Math.atan2(player.acc.coords.y, player.acc.coords.x);
-      const lenA = Math.sqrt(player.acc.coords.x**2 + player.acc.coords.y **2);
-      const angleB = Math.atan2(player.acc.coords.z, lenA);
+      const directionCoords = player.vel.coords;
+      const angleA = Math.atan2(directionCoords.y, directionCoords.x);
+      const lenA = Math.sqrt(directionCoords.x**2 + directionCoords.y **2);
+      const angleB = Math.atan2(directionCoords.z, lenA);
 
       const timeshiftedCenterPoint = timeshift(player.pos, t);
 

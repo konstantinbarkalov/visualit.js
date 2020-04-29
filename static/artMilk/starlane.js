@@ -31,7 +31,7 @@ class StarlanePool {
     return starlane;
   }
   draw(t, dt) {
-    basic.pie.main.setLineWidth(5);
+    basic.pie.main.setLineWidth(2);
     this.starlanes.forEach((starlane) => {
       const intervals = splitArray(starlane.steps, 2, 1);
       intervals.forEach(interval => {

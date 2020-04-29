@@ -118,7 +118,7 @@ class Camera {
 }
 class SmoothInput {
   decayPerSec = 0.8;
-  scrollBound = 1000;
+  scrollBound = 1500;
   xRatio = 0.5;
   yRatio = 0.5;
   scrollAltShiftRatio = 0.5;

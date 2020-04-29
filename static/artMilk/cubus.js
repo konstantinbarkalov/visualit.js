@@ -19,8 +19,8 @@ class Cubus {
     this.size = size;
   }
   ;
-  ttl = 2;
-  maxTtl = 2;
+  ttl = 60;
+  maxTtl = 60;
   iteration(t, dt) {
     this.ttl -= dt;
     const ttlRatio = this.ttl / this.maxTtl;
@@ -53,17 +53,17 @@ class CubusPool {
   addRandom() {
     const size = new Point3D(100,100,100);
     const pos = new Point3D(Math.random() * fieldWidth, Math.random() * fieldHeight, (Math.random() - 0.5) * fieldDepth);
-    //const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
+    const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
-    const vel = new Point3D();
+    //const vel = new Point3D();
     const acc = new Point3D();
     return this.add(pos, vel, acc, size);
   }
   addRandomAtPos(pos) {
     const size = new Point3D(100,100,100);
-    //const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
+    const vel = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     //const acc = new Point3D((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
-    const vel = new Point3D();
+    //const vel = new Point3D();
     const acc = new Point3D();
     return this.add(pos, vel, acc, size);
   }

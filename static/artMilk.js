@@ -187,8 +187,8 @@ function artMilkInit() {
     dustPool.addRandom();
   }
 
-  for (let i = 0; i < 25; i++) {
-    //cubusPool.addRandom();
+  for (let i = 0; i < 5; i++) {
+    cubusPool.addRandom();
     //sparclePool.addRandom();
     //playerPool.addRandom();
   }

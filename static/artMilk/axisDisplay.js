@@ -59,7 +59,6 @@ class AxisDisplay {
     });
     if (!isInField(cursorProjector.pos)) {
 
-
       const axisFieldBoundWorldUpLeft = new Point2D();
       const axisFieldBoundWorldDownRight = new Point2D(fieldWidth, fieldHeight);
 
@@ -96,6 +95,22 @@ class AxisDisplay {
       });
 
     }
+
+    basic.pie.main.setAlpha(0.5);
+    basic.pie.main.setLineWidth(1);
+
+    starPool.stars.forEach(star => {
+      const maxZDist = 50;
+      const zDiff = star.pos.coords.z - cursorProjector.pos.coords.z;
+      const zDist = Math.abs(zDiff);
+      const sliceRadius = maxZDist - zDist;
+      if (sliceRadius > 0) {
+        const timeShiftedWorldPoint = timeshift(star.pos, t);
+        const screenPoint = camera.mapToScreen(timeShiftedWorldPoint);
+        basic.pie.main.setColor(star.style.color.r, star.style.color.g, star.style.color.b);
+        basic.pie.main.plotCircle(screenPoint.coords.x, screenPoint.coords.y, sliceRadius * screenPoint.zScale);
+      };
+    });
   }
   generateSideRollerPolys(upLeftPoint2D, downRightPoint2D) {
     return [
