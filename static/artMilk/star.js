@@ -21,6 +21,31 @@ class Star {
       }
     }
   };
+  drawIteration(t, dt) {
+    const timeshiftedPoint = timeshift(this.pos, t);
+    const blinkRatio = sampleBlinkRatio(t, this.style.entropy.blink.freq, this.style.entropy.blink.phaseShift);
+    let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, this.style.entropy.burnWave.phaseShift, 50);
+    burnWaveRatio *= this.style.entropy.burnWave.amount;
+
+    const screenPoint = camera.mapToScreen(timeshiftedPoint);
+
+    //let intense = 0.4 * this.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+    let intense =
+      + 0.5 * this.style.intense
+      + 0.5 * blinkRatio
+      + 2 * burnWaveRatio;
+    const tweakedIntense1 = Math.pow(intense, 1/2);
+    const tweakedIntense2 = Math.pow(intense, 2);
+    const exSize = tweakedIntense2 * 4 * screenPoint.zScale;
+    const plusSize = tweakedIntense1 * 1 * screenPoint.zScale;
+    const alpha = tweakedIntense1 * 1;
+    basic.pie.main.setAlpha(alpha);
+    for (let layerId = 0; layerId < intense; layerId++) {
+      const factor = layerId + 1;
+      basic.pie.main.setFillColor(this.style.color.r * factor, this.style.color.g * factor, this.style.color.b * factor);
+      fillStarShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
+    }
+  }
 }
 
 
@@ -50,29 +75,7 @@ class StarPool {
   }
   drawIteration(t, dt) {
     this.stars.forEach((star) => {
-      const timeshiftedPoint = timeshift(star.pos, t);
-      const blinkRatio = sampleBlinkRatio(t, star.style.entropy.blink.freq, star.style.entropy.blink.phaseShift);
-      let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, star.style.entropy.burnWave.phaseShift, 50);
-      burnWaveRatio *= star.style.entropy.burnWave.amount;
-
-      const screenPoint = camera.mapToScreen(timeshiftedPoint);
-
-      //let intense = 0.4 * star.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-      let intense =
-        + 0.5 * star.style.intense
-        + 0.5 * blinkRatio
-        + 2 * burnWaveRatio;
-      const tweakedIntense1 = Math.pow(intense, 1/2);
-      const tweakedIntense2 = Math.pow(intense, 2);
-      const exSize = tweakedIntense2 * 4 * screenPoint.zScale;
-      const plusSize = tweakedIntense1 * 1 * screenPoint.zScale;
-      const alpha = tweakedIntense1 * 1;
-      basic.pie.main.setAlpha(alpha);
-      for (let layerId = 0; layerId < intense; layerId++) {
-        const factor = layerId + 1;
-        basic.pie.main.setFillColor(star.style.color.r * factor, star.style.color.g * factor, star.style.color.b * factor);
-        fillStarShape(screenPoint.coords.x, screenPoint.coords.y, exSize / factor, plusSize / factor);
-      }
+      star.drawIteration(t, dt);
     });
   }
 }

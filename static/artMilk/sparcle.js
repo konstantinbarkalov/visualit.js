@@ -20,6 +20,32 @@ class Sparcle {
     this.trail.unshift(this.pos.clone());
     this.trail.splice(this.maxTrailLength);
   }
+  drawIteration(t, dt) {
+    basic.pie.main.setPlotColor(255, 0, 0);
+    const trailScreenPoints = this.trail.map((worldCoords, worldCoordsId)=>{
+      let timeshiftedPoint = timeshift(worldCoords, t);
+      const screenPoint = camera.mapToScreen(timeshiftedPoint);
+      return screenPoint;
+    });
+    if (trailScreenPoints.length > 0) {
+      let prevCoords = trailScreenPoints[0].coords;
+      if (trailScreenPoints.every((point) => { // TODO: check just boundary
+        const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
+                               Math.abs(prevCoords.y - point.coords.y) +
+                               Math.abs(prevCoords.z - point.coords.z);
+
+        const isNoTooLong = simpleDistance < 800;
+        prevCoords = point.coords;
+        return isNoTooLong;
+      })) {
+        splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
+          basic.pie.main.setAlpha((20 - sliceId) / 20 * this.ttl / 5);
+          basic.pie.main.setLineWidth((sliceId + 1) * 1 * slice[0].zScale);
+          basic.pie.main.plotPolyline(slice.map(point => point.coords));
+        })
+      }
+    }
+  }
 }
 
 
@@ -50,37 +76,8 @@ class SparclePool {
     return this.add(pos, vel, acc);
   }
   drawIteration(t, dt) {
-    //basic.pie.main.setPlotColor(0,128,255);
-    basic.pie.main.setPlotColor(255, 0, 0);
-    //basic.pie.main.setAlpha(0.25);
-
-
-
-
     this.sparcles.forEach((sparcle) => {
-      const trailScreenPoints = sparcle.trail.map((worldCoords, worldCoordsId)=>{
-        let timeshiftedPoint = timeshift(worldCoords, t);
-        const screenPoint = camera.mapToScreen(timeshiftedPoint);
-        return screenPoint;
-      });
-      if (trailScreenPoints.length > 0) {
-        let prevCoords = trailScreenPoints[0].coords;
-        if (trailScreenPoints.every((point) => { // TODO: check just boundary
-          const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
-                                 Math.abs(prevCoords.y - point.coords.y) +
-                                 Math.abs(prevCoords.z - point.coords.z);
-
-          const isNoTooLong = simpleDistance < 800;
-          prevCoords = point.coords;
-          return isNoTooLong;
-        })) {
-          splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
-            basic.pie.main.setAlpha((20 - sliceId) / 20 * sparcle.ttl / 5);
-            basic.pie.main.setLineWidth((sliceId + 1) * 1 * slice[0].zScale);
-            basic.pie.main.plotPolyline(slice.map(point => point.coords));
-          })
-        }
-      }
+      sparcle.drawIteration(t, dt);
     });
   }
 }

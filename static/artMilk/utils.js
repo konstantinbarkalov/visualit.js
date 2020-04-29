@@ -74,7 +74,7 @@ function generateZodiacStarsAndLanesFromPolys(polys) {
     const laneStars = poly.map((point) => {
       return uniqueStars.getValue(point);
     });
-    const starlane =  new Starlane(laneStars);
+    const starlane =  new StaticStarlane(laneStars);
     starlane.style.color = {r: 255, g: 255, b: 255};
     return starlane;
   });

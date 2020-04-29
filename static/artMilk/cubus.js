@@ -32,6 +32,54 @@ class Cubus {
     this.pos.coords.z += this.vel.coords.z * dt;
     this.blinkPhase += this.style.entropy.blink.freq * dt * ttlRatio;
   }
+  drawIteration(t, dt) {
+    basic.pie.extra.setLineWidth(2);
+    const timeshiftedCenterPoint = timeshift(this.pos, t);
+    const wordVertices = [
+      timeshiftedCenterPoint.add(new Point3D(+this.size.coords.x / 2, +this.size.coords.y / 2, +this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(+this.size.coords.x / 2, -this.size.coords.y / 2, +this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(-this.size.coords.x / 2, -this.size.coords.y / 2, +this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(-this.size.coords.x / 2, +this.size.coords.y / 2, +this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(+this.size.coords.x / 2, +this.size.coords.y / 2, -this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(+this.size.coords.x / 2, -this.size.coords.y / 2, -this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(-this.size.coords.x / 2, -this.size.coords.y / 2, -this.size.coords.z / 2)),
+      timeshiftedCenterPoint.add(new Point3D(-this.size.coords.x / 2, +this.size.coords.y / 2, -this.size.coords.z / 2)),
+    ]
+    const poligonsVertexIds = [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [0, 1, 5, 4],
+      [2, 3, 7, 6],
+      [1, 2, 6, 5],
+      [3, 0, 4, 7],
+    ]
+
+    const screenVertices = wordVertices.map((vertex) => {
+      const screenPoint = camera.mapToScreen(vertex);
+      return screenPoint;
+    });
+    const screenPoligons = poligonsVertexIds.map((poligonVertexIds)=>{
+      return poligonVertexIds.map((poligonVertexId)=>{
+        return screenVertices[poligonVertexId].coords;
+      });
+    });
+
+    basic.pie.extra.setFillColor(this.style.color.r, this.style.color.g, this.style.color.b);
+    basic.pie.extra.setPlotColor(this.style.color.r, this.style.color.g, this.style.color.b);
+
+    const blinkRatio = Math.sin(this.blinkPhase * Math.PI * 2) / 2 + 0.5;
+    const ttlRatio = this.ttl / this.maxTtl;
+    basic.pie.extra.setAlpha(0.2 * ttlRatio);
+    screenPoligons.forEach((screenPoligon)=>{
+      basic.pie.extra.fillPolygon(screenPoligon);
+    })
+    basic.pie.extra.setAlpha((0.5 + blinkRatio * 0.5) * ttlRatio);
+
+    screenPoligons.forEach((screenPoligon)=>{
+      basic.pie.extra.plotPolyline(screenPoligon, true);
+    });
+
+  }
 }
 
 
@@ -68,53 +116,8 @@ class CubusPool {
     return this.add(pos, vel, acc, size);
   }
   drawIteration(t, dt) {
-    basic.pie.extra.setLineWidth(2);
     this.cubuses.forEach((cubus) => {
-      const timeshiftedCenterPoint = timeshift(cubus.pos, t);
-      const wordVertices = [
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, +cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, -cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, -cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, +cubus.size.coords.y / 2, +cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, +cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(+cubus.size.coords.x / 2, -cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, -cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
-        timeshiftedCenterPoint.add(new Point3D(-cubus.size.coords.x / 2, +cubus.size.coords.y / 2, -cubus.size.coords.z / 2)),
-      ]
-      const poligonsVertexIds = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 1, 5, 4],
-        [2, 3, 7, 6],
-        [1, 2, 6, 5],
-        [3, 0, 4, 7],
-      ]
-
-      const screenVertices = wordVertices.map((vertex) => {
-        const screenPoint = camera.mapToScreen(vertex);
-        return screenPoint;
-      });
-      const screenPoligons = poligonsVertexIds.map((poligonVertexIds)=>{
-        return poligonVertexIds.map((poligonVertexId)=>{
-          return screenVertices[poligonVertexId].coords;
-        });
-      });
-
-      basic.pie.extra.setFillColor(cubus.style.color.r, cubus.style.color.g, cubus.style.color.b);
-      basic.pie.extra.setPlotColor(cubus.style.color.r, cubus.style.color.g, cubus.style.color.b);
-
-      const blinkRatio = Math.sin(cubus.blinkPhase * Math.PI * 2) / 2 + 0.5;
-      const ttlRatio = cubus.ttl / cubus.maxTtl;
-      basic.pie.extra.setAlpha(0.2 * ttlRatio);
-      screenPoligons.forEach((screenPoligon)=>{
-        basic.pie.extra.fillPolygon(screenPoligon);
-      })
-      basic.pie.extra.setAlpha((0.5 + blinkRatio * 0.5) * ttlRatio);
-
-      screenPoligons.forEach((screenPoligon)=>{
-        basic.pie.extra.plotPolyline(screenPoligon, true);
-      });
-
+      cubus.drawIteration(t, dt);
     });
   }
 }

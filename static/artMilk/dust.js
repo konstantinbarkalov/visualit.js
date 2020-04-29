@@ -21,6 +21,34 @@ class Dust {
       }
     }
   };
+  drawIteration(t, dt) {
+    const timeshiftedPoint = timeshift(this.pos, t);
+
+    const blinkRatio = sampleBlinkRatio(t, this.style.entropy.blink.freq, this.style.entropy.blink.phaseShift);
+    let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, this.style.entropy.burnWave.phaseShift - 0.1, 2);
+    //burnWaveRatio *= this.style.entropy.burnWave.amount;
+
+    const screenPoint = camera.mapToScreen(timeshiftedPoint);
+
+
+
+
+    //let intense = 0.4 * this.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
+    let intense =
+      + 0.5 * this.style.intense
+      + 0.5 * blinkRatio
+      + 2 * burnWaveRatio
+      - 1.1;
+
+    if (intense > 0) {
+      const tweakedIntense = Math.pow(intense, 1/2);
+      const plusSize = tweakedIntense / screenPoint.zScale * 1.5;
+      basic.pie.main.setAlpha(tweakedIntense);
+      basic.pie.main.setPlotColor(this.style.color.r, this.style.color.g, this.style.color.b);
+      basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
+      basic.pie.main.plotLine(screenPoint.coords.x - plusSize, screenPoint.coords.y, screenPoint.coords.x + plusSize, screenPoint.coords.y);
+    }
+  }
 }
 
 
@@ -50,32 +78,7 @@ class DustPool {
   }
   drawIteration(t, dt) {
     this.dusts.forEach((dust) => {
-      const timeshiftedPoint = timeshift(dust.pos, t);
-
-      const blinkRatio = sampleBlinkRatio(t, dust.style.entropy.blink.freq, dust.style.entropy.blink.phaseShift);
-      let burnWaveRatio = sampleBurnWaveRatio(t, timeshiftedPoint.coords.x, timeshiftedPoint.coords.y, dust.style.entropy.burnWave.phaseShift - 0.1, 2);
-      //burnWaveRatio *= dust.style.entropy.burnWave.amount;
-
-      const screenPoint = camera.mapToScreen(timeshiftedPoint);
-
-
-
-
-      //let intense = 0.4 * dust.style.intense + blinkRatio * 0.4 + Math.random() * 0.2;
-      let intense =
-        + 0.5 * dust.style.intense
-        + 0.5 * blinkRatio
-        + 2 * burnWaveRatio
-        - 1.1;
-
-      if (intense > 0) {
-        const tweakedIntense = Math.pow(intense, 1/2);
-        const plusSize = tweakedIntense / screenPoint.zScale * 1.5;
-        basic.pie.main.setAlpha(tweakedIntense);
-        basic.pie.main.setPlotColor(dust.style.color.r, dust.style.color.g, dust.style.color.b);
-        basic.pie.main.plotLine(screenPoint.coords.x, screenPoint.coords.y - plusSize, screenPoint.coords.x, screenPoint.coords.y + plusSize);
-        basic.pie.main.plotLine(screenPoint.coords.x - plusSize, screenPoint.coords.y, screenPoint.coords.x + plusSize, screenPoint.coords.y);
-      }
+      dust.drawIteration(t, dt);
     });
   }
 }

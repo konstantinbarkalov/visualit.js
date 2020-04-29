@@ -99,6 +99,71 @@ class Player {
   endCurrentStarlane() {
     this.starlane = null;
   }
+  drawIteration(t, dt) {
+    const directionCoords = this.vel.coords;
+    const angleA = Math.atan2(directionCoords.y, directionCoords.x);
+    const lenA = Math.sqrt(directionCoords.x**2 + directionCoords.y **2);
+    const angleB = Math.atan2(directionCoords.z, lenA);
+
+    const timeshiftedCenterPoint = timeshift(this.pos, t);
+
+    const screenCircles = playerSpheres.map((sphere) => {
+      let worldPos = sphere.pos;
+      worldPos = worldPos.rotateY(t * Math.PI * 2);
+      worldPos = worldPos.rotateX(-angleB);
+      worldPos = worldPos.rotateZ(angleA + Math.PI / 2);
+
+      const timeshiftedWorldPos = timeshiftedCenterPoint.add(worldPos);
+      const screenPoint = camera.mapToScreen(timeshiftedWorldPos);
+      screenPoint.zScale * sphere.size / 2;
+      return {pos: screenPoint, radius: screenPoint.zScale * sphere.size / 2, color: sphere.color};
+    }).sort((a, b) => {
+      return a.pos.zScale - b.pos.zScale;
+    });
+
+    basic.pie.main.setAlpha(1);
+
+    const screenPlayerPoint = camera.mapToScreen(timeshiftedCenterPoint);
+    basic.pie.main.setColor(255,128,0);
+    basic.pie.main.print(screenPlayerPoint.coords.x + 100, screenPlayerPoint.coords.y + 100, this.acc.coords.x.toFixed(2));
+    screenCircles.forEach((screenCircle)=>{
+      let color = screenCircle.color;
+      if (typeof color === 'string') {
+        color = this.style.colors[color];
+      }
+      basic.pie.main.setFillColor(color.r, color.g, color.b);
+      basic.pie.main.fillCircle(screenCircle.pos.coords.x, screenCircle.pos.coords.y, screenCircle.radius);
+    })
+
+    basic.pie.main.setPlotColor(0, 128, 255);
+
+    const trailScreenPoints = this.trail.map((worldCoords, worldCoordsId)=>{
+      let timeshiftedPoint = timeshift(worldCoords, t);
+      timeshiftedPoint.coords.x += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
+      timeshiftedPoint.coords.y += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
+      timeshiftedPoint.coords.z += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
+      const screenPoint = camera.mapToScreen(timeshiftedPoint);
+      return screenPoint;
+    });
+    if (trailScreenPoints.length > 0) {
+      let prevCoords = trailScreenPoints[0].coords;
+      if (trailScreenPoints.every((point) => { // TODO: check just boundary
+        const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
+                               Math.abs(prevCoords.y - point.coords.y) +
+                               Math.abs(prevCoords.z - point.coords.z);
+
+        const isNoTooLong = simpleDistance < 800;
+        prevCoords = point.coords;
+        return isNoTooLong;
+      })) {
+        splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
+          basic.pie.main.setAlpha((30 - sliceId) / 30 / 3);
+          basic.pie.main.setLineWidth((sliceId + 1) * 3 * slice[0].zScale);
+          basic.pie.main.plotPolyline(slice.map(point => point.coords));
+        })
+      }
+    }
+  }
 }
 class PlayerPool {
   players = [];
@@ -141,69 +206,7 @@ class PlayerPool {
 
   drawIteration(t, dt) {
     this.players.forEach((player) => {
-      const directionCoords = player.vel.coords;
-      const angleA = Math.atan2(directionCoords.y, directionCoords.x);
-      const lenA = Math.sqrt(directionCoords.x**2 + directionCoords.y **2);
-      const angleB = Math.atan2(directionCoords.z, lenA);
-
-      const timeshiftedCenterPoint = timeshift(player.pos, t);
-
-      const screenCircles = playerSpheres.map((sphere) => {
-        let worldPos = sphere.pos;
-        worldPos = worldPos.rotateY(t * Math.PI * 2);
-        worldPos = worldPos.rotateX(-angleB);
-        worldPos = worldPos.rotateZ(angleA + Math.PI / 2);
-
-        const timeshiftedWorldPos = timeshiftedCenterPoint.add(worldPos);
-        const screenPoint = camera.mapToScreen(timeshiftedWorldPos);
-        screenPoint.zScale * sphere.size / 2;
-        return {pos: screenPoint, radius: screenPoint.zScale * sphere.size / 2, color: sphere.color};
-      }).sort((a, b) => {
-        return a.pos.zScale - b.pos.zScale;
-      });
-
-      basic.pie.main.setAlpha(1);
-
-      const screenPlayerPoint = camera.mapToScreen(timeshiftedCenterPoint);
-      basic.pie.main.setColor(255,128,0);
-      basic.pie.main.print(screenPlayerPoint.coords.x + 100, screenPlayerPoint.coords.y + 100, player.acc.coords.x.toFixed(2));
-      screenCircles.forEach((screenCircle)=>{
-        let color = screenCircle.color;
-        if (typeof color === 'string') {
-          color = player.style.colors[color];
-        }
-        basic.pie.main.setFillColor(color.r, color.g, color.b);
-        basic.pie.main.fillCircle(screenCircle.pos.coords.x, screenCircle.pos.coords.y, screenCircle.radius);
-      })
-
-      basic.pie.main.setPlotColor(0, 128, 255);
-
-      const trailScreenPoints = player.trail.map((worldCoords, worldCoordsId)=>{
-        let timeshiftedPoint = timeshift(worldCoords, t);
-        timeshiftedPoint.coords.x += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
-        timeshiftedPoint.coords.y += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
-        timeshiftedPoint.coords.z += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
-        const screenPoint = camera.mapToScreen(timeshiftedPoint);
-        return screenPoint;
-      });
-      if (trailScreenPoints.length > 0) {
-        let prevCoords = trailScreenPoints[0].coords;
-        if (trailScreenPoints.every((point) => { // TODO: check just boundary
-          const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
-                                 Math.abs(prevCoords.y - point.coords.y) +
-                                 Math.abs(prevCoords.z - point.coords.z);
-
-          const isNoTooLong = simpleDistance < 800;
-          prevCoords = point.coords;
-          return isNoTooLong;
-        })) {
-          splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
-            basic.pie.main.setAlpha((30 - sliceId) / 30 / 3);
-            basic.pie.main.setLineWidth((sliceId + 1) * 3 * slice[0].zScale);
-            basic.pie.main.plotPolyline(slice.map(point => point.coords));
-          })
-        }
-      }
+      player.drawIteration(t, dt);
 
     });
   }
