@@ -23,7 +23,7 @@ let playerPool = null;
 let starlanePool = null;
 let spitPool = null;
 let axisDisplay = null;
-window.flyMode = 3; // flyMode TODO: remove
+window.flyMode = 0; // flyMode TODO: remove
 function artMilkInit() {
 
 
