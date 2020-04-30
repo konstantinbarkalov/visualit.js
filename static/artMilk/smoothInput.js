@@ -1,5 +1,5 @@
 class SmoothInput {
-  decayPerSec = 0.9999;
+  decayPerSec = 0.9;
   scrollBound = 1500;
   xRatio = 0.5;
   yRatio = 0.5;
