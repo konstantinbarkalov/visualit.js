@@ -1,7 +1,7 @@
 async function art() {
   artInit();
   let t = 0;
-  const idealFps = 60;
+  const idealFps = 30;
   const idealDt = 1 / idealFps;
   let prevIterationStartSysTime = performance.now() / 1000;
   let prevDutyRatio = 0.5;

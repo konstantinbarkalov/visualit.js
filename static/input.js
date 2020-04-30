@@ -18,7 +18,32 @@ class VisualitInput {
       if (e.which === 32) {
         e.preventDefault();
         this.onPrimaryKeyChange(true);
+      } else if (e.which === 13) {
+        e.preventDefault();
+        this.onSecondaryKeyChange(true);
+      } else if (e.which === 90) {
+        e.preventDefault();
+        this.onAKeyChange(true);
+      } else if (e.which === 88) {
+        e.preventDefault();
+        this.onBKeyChange(true);
+      } else if (e.which === 67) {
+        e.preventDefault();
+        this.onCKeyChange(true);
+      } else if (e.which === 38) {
+        e.preventDefault();
+        this.onUpKeyChange(true);
+      } else if (e.which === 40) {
+        e.preventDefault();
+        this.onDownKeyChange(true);
+      } else if (e.which === 37) {
+        e.preventDefault();
+        this.onLeftKeyChange(true);
+      } else if (e.which === 39) {
+        e.preventDefault();
+        this.onRightKeyChange(true);
       }
+
     });
     document.addEventListener('keyup', (e) => {
       if (e.which >= 16 && e.which <= 18) {
@@ -26,21 +51,52 @@ class VisualitInput {
       }
       if (e.which === 32) {
         this.onPrimaryKeyChange(false);
+      } else if (e.which === 13) {
+        this.onSecondaryKeyChange(false);
+      } else if (e.which === 90) {
+        this.onAKeyChange(false);
+      } else if (e.which === 88) {
+        this.onBKeyChange(false);
+      } else if (e.which === 67) {
+        this.onCKeyChange(false);
+      } else if (e.which === 38) {
+        this.onUpKeyChange(false);
+      } else if (e.which === 40) {
+        this.onDownKeyChange(false);
+      } else if (e.which === 37) {
+        this.onLeftKeyChange(false);
+      } else if (e.which === 39) {
+        this.onRightKeyChange(false);
       }
     });
     document.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      this.onPrimaryKeyChange(true);
-
+      if (e.which === 1)  {
+        e.preventDefault();
+        this.onPrimaryKeyChange(true);
+      } else if (e.which === 3) {
+        e.preventDefault();
+        this.onSecondaryKeyChange(true);
+      }
     });
     document.addEventListener('mouseup', (e) => {
-      this.onPrimaryKeyChange(false);
-
+      if (e.which === 1)  {
+        this.onPrimaryKeyChange(false);
+      } else if (e.which === 3) {
+        this.onSecondaryKeyChange(false);
+      }
     });
     this.onResize();
     this.onMouseMove(this.basic.w / 2, this.basic.h / 2);
     this.onMouseScrollReset();
     this.onPrimaryKeyChange(false);
+    this.onSecondaryKeyChange(false);
+    this.onAKeyChange(false);
+    this.onBKeyChange(false);
+    this.onCKeyChange(false);
+    this.onUpKeyChange(false);
+    this.onDownKeyChange(false);
+    this.onLeftKeyChange(false);
+    this.onRightKeyChange(false);
   }
   basic = {
     w: 0,
@@ -54,6 +110,14 @@ class VisualitInput {
     xRatio: 0,
     yRatio: 0,
     isPrimaryPressed: false,
+    isSecondaryPressed: false,
+    isAPressed: false,
+    isBPressed: false,
+    isCPressed: false,
+    isUpPressed: false,
+    isDownPressed: false,
+    isLeftPressed: false,
+    isRightPressed: false,
     isShiftPressed: false,
     isAltPressed: false,
     isCtrlPressed: false,
@@ -87,9 +151,56 @@ class VisualitInput {
   }
   onPrimaryKeyChange(isPressed) {
     this.basic.isPrimaryPressed = isPressed;
-
     if (this.onPrimaryKeyChangeChallback) {
       this.onPrimaryKeyChangeChallback();
+    }
+  }
+  onSecondaryKeyChange(isPressed) {
+    this.basic.isSecondaryPressed = isPressed;
+    if (this.onSecondaryKeyChangeChallback) {
+      this.onSecondaryKeyChangeChallback();
+    }
+  }
+  onAKeyChange(isPressed) {
+    this.basic.isAPressed = isPressed;
+    if (this.onAKeyChangeChallback) {
+      this.onAKeyChangeChallback();
+    }
+  }
+  onBKeyChange(isPressed) {
+    this.basic.isBPressed = isPressed;
+    if (this.onBKeyChangeChallback) {
+      this.onBKeyChangeChallback();
+    }
+  }
+  onCKeyChange(isPressed) {
+    this.basic.isCPressed = isPressed;
+    if (this.onCKeyChangeChallback) {
+      this.onCKeyChangeChallback();
+    }
+  }
+  onUpKeyChange(isPressed) {
+    this.basic.isUpPressed = isPressed;
+    if (this.onUpKeyChangeChallback) {
+      this.onUpKeyChangeChallback();
+    }
+  }
+  onDownKeyChange(isPressed) {
+    this.basic.isDownPressed = isPressed;
+    if (this.onDownKeyChangeChallback) {
+      this.onDownKeyChangeChallback();
+    }
+  }
+  onLeftKeyChange(isPressed) {
+    this.basic.isLeftPressed = isPressed;
+    if (this.onLeftKeyChangeChallback) {
+      this.onLeftKeyChangeChallback();
+    }
+  }
+  onRightKeyChange(isPressed) {
+    this.basic.isRightPressed = isPressed;
+    if (this.onRightKeyChangeChallback) {
+      this.onRightKeyChangeChallback();
     }
   }
   onModificatorKeyChange(isShiftPressed, isAltPressed, isCtrlPressed) {

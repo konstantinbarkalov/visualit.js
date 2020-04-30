@@ -139,6 +139,7 @@ function fillStarShape(x, y, exSize, plusSize) {
   ]);
 }
 function timeshift(point, t) {
+  // obsolete, do nothing really TODO: remove
   //let timeshiftedX = (point.coords.x - t * 100);
   let timeshiftedX = (point.coords.x - t * 100 * 0);
   //let timeshiftedX = (point.coords.x - Math.sin(t / 3) * 100);

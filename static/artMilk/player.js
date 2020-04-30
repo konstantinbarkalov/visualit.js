@@ -10,7 +10,8 @@ class PlayerSphere {
   };
 }
 class Player {
-  trail = [];
+  selfTrail = [];
+  exhaustTrail = [];
   maxTrailLength = 150;
   mass = 1;
   maxPower = 100;
@@ -44,14 +45,46 @@ class Player {
     this.beginNewStarlane();
   };
   phisicIteration(t, dt) {
+    const maxPower = this.maxPower + (basic.input.isAPressed ? 1000 : 0);
+    const maxAccLen = maxPower / this.mass;
     const diff = this.pos.subtract(cursorProjector.pos);
-    const targetVel = diff.everyCoord((coord) => -coord / this.desireArivementTime);
-    const targetAcc = targetVel.subtract(this.vel).everyCoord(coord => coord / dt);
-    const targetAccLen = targetAcc.len();
-    const maxAccLen = this.maxPower / this.mass;
-    const accLen = Math.min(targetAccLen, maxAccLen);
-    const accLenCappingFactor = accLen / targetAccLen;
-    this.acc = targetAcc.everyCoord((coord) => coord * accLenCappingFactor);
+    const dist = diff.len();
+    if (dist === 0) {
+      this.acc = new Point3D();
+    } else {
+      //const desireSafeSpeed = desireSafeTime * maxAccLen; // h * km/h^2 = km/h
+      const desireSafeSpeed = Math.sqrt(dist * maxAccLen * 2); // sqrt(km * km/h^2) = sqrt(km^2/h^2) = sqrt((km/h)^2)
+
+
+      //const desireArivementTime = this.desireArivementTime;
+      const targetVel = diff.everyCoord((coord) => -coord / dist * desireSafeSpeed);
+      const targetAcc = targetVel.subtract(this.vel).everyCoord(coord => coord / dt);
+      const targetAccLen = targetAcc.len();
+      const accLen = Math.min(targetAccLen, maxAccLen);
+      const accLenCappingFactor = accLen / targetAccLen;
+      this.acc = targetAcc.everyCoord((coord) => coord * accLenCappingFactor);
+      //for (let i = 0; i < 3; i++) {
+
+        if (window.flyMode !== 0) { //  flyMode TODO: remove
+          const spitPos = this.pos.clone();
+          const spitVel = this.vel.clone();
+          const spitAcc = this.acc.everyCoord(coord => coord * -100 + (Math.random() - 0.5) * 10000);
+          spitVel.coords.x += spitAcc.coords.x * dt;
+          spitVel.coords.y += spitAcc.coords.y * dt;
+          spitVel.coords.z += spitAcc.coords.z * dt;
+
+          const spitPower = accLen * this.mass;
+          const spit = spitPool.add(spitPos, spitVel, spitPower);
+          spit.style.color = (Math.random() < 0.5) ? this.style.colors.primaryA : this.style.colors.primaryB;
+
+          this.selfTrail.unshift(spitPos); // no clone!!
+          this.selfTrail.splice(this.maxTrailLength);
+        }
+      //}
+    }
+
+    this.exhaustTrail.unshift(this.pos.clone());
+    this.exhaustTrail.splice(this.maxTrailLength);
 
     this.vel.coords.x += this.acc.coords.x * dt;
     this.vel.coords.y += this.acc.coords.y * dt;
@@ -62,8 +95,6 @@ class Player {
     this.pos.coords.y += this.vel.coords.y * dt;
     this.pos.coords.z += this.vel.coords.z * dt;
 
-    this.trail.unshift(this.pos.clone());
-    this.trail.splice(this.maxTrailLength);
 
 
     if (this.starlane) {
@@ -100,7 +131,15 @@ class Player {
     this.starlane = null;
   }
   drawIteration(t, dt) {
-    const directionCoords = this.vel.coords;
+    //const directionCoords = this.vel.coords;
+    let directionCoords;
+    if (window.flyMode === 0) { //  flyMode TODO: remove
+      directionCoords = this.vel.coords;
+    } else if (window.flyMode === 2) {
+      directionCoords = this.vel.coords;
+    } else {
+      directionCoords = this.acc.coords;
+    }
     const angleA = Math.atan2(directionCoords.y, directionCoords.x);
     const lenA = Math.sqrt(directionCoords.x**2 + directionCoords.y **2);
     const angleB = Math.atan2(directionCoords.z, lenA);
@@ -124,8 +163,11 @@ class Player {
     basic.pie.main.setAlpha(1);
 
     const screenPlayerPoint = camera.mapToScreen(timeshiftedCenterPoint);
-    basic.pie.main.setColor(255,128,0);
-    basic.pie.main.print(screenPlayerPoint.coords.x + 100, screenPlayerPoint.coords.y + 100, this.acc.coords.x.toFixed(2));
+    const labelText = 'vel: ' + this.vel.len().toFixed(2) + ' acc: ' + this.acc.len().toFixed(2);
+    basic.pie.main.setColor(10,20,30);
+    basic.pie.main.fillRect(screenPlayerPoint.coords.x + 100, screenPlayerPoint.coords.y + 100, screenPlayerPoint.coords.x + 240, screenPlayerPoint.coords.y + 120)
+    basic.pie.main.setColor(255,255,255);
+    basic.pie.main.print(screenPlayerPoint.coords.x + 100 + 10, screenPlayerPoint.coords.y + 100 + 10 + 2, labelText);
     screenCircles.forEach((screenCircle)=>{
       let color = screenCircle.color;
       if (typeof color === 'string') {
@@ -135,9 +177,28 @@ class Player {
       basic.pie.main.fillCircle(screenCircle.pos.coords.x, screenCircle.pos.coords.y, screenCircle.radius);
     })
 
-    basic.pie.main.setPlotColor(0, 128, 255);
+    // basic.pie.main.setPlotColor(this.style.colors.primaryA.r, this.style.colors.primaryA.g, this.style.colors.primaryA.b);
+    // this.drawTrail(this.exhaustTrail, t, dt);
 
-    const trailScreenPoints = this.trail.map((worldCoords, worldCoordsId)=>{
+    // basic.pie.main.setPlotColor(this.style.colors.primaryB.r, this.style.colors.primaryB.g, this.style.colors.primaryB.b);
+    // this.drawTrail(this.selfTrail, t, dt);
+
+    if (window.flyMode === 0) { //  flyMode TODO: remove
+      basic.pie.main.setPlotColor(this.style.colors.primaryA.r, this.style.colors.primaryA.g, this.style.colors.primaryA.b);
+      this.drawTrail(this.exhaustTrail, t, dt);
+    } else if (window.flyMode === 1) {
+      basic.pie.main.setPlotColor(this.style.colors.primaryB.r, this.style.colors.primaryB.g, this.style.colors.primaryB.b);
+      this.drawTrail(this.selfTrail, t, dt);
+    } else {
+      basic.pie.main.setPlotColor(this.style.colors.primaryA.r, this.style.colors.primaryA.g, this.style.colors.primaryA.b);
+      this.drawTrail(this.exhaustTrail, t, dt);
+
+      basic.pie.main.setPlotColor(this.style.colors.primaryB.r, this.style.colors.primaryB.g, this.style.colors.primaryB.b);
+      this.drawTrail(this.selfTrail, t, dt);
+    }
+  }
+  drawTrail(trail, t, dt) {
+    const trailScreenPoints = trail.map((worldCoords, worldCoordsId)=>{
       let timeshiftedPoint = timeshift(worldCoords, t);
       timeshiftedPoint.coords.x += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
       timeshiftedPoint.coords.y += (Math.random() / 2 - 0.5) * worldCoordsId * 1;
@@ -146,21 +207,11 @@ class Player {
       return screenPoint;
     });
     if (trailScreenPoints.length > 0) {
-      let prevCoords = trailScreenPoints[0].coords;
-      if (trailScreenPoints.every((point) => { // TODO: check just boundary
-        const simpleDistance = Math.abs(prevCoords.x - point.coords.x) +
-                               Math.abs(prevCoords.y - point.coords.y);
-
-        const isNoTooLong = simpleDistance < 800;
-        prevCoords = point.coords;
-        return isNoTooLong;
-      })) {
-        splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
-          basic.pie.main.setAlpha((30 - sliceId) / 30 / 3);
-          basic.pie.main.setLineWidth((sliceId + 1) * 3 * slice[0].zScale);
-          basic.pie.main.plotPolyline(slice.map(point => point.coords));
-        })
-      }
+      splitArray(trailScreenPoints, 5, 1).forEach((slice, sliceId)=>{
+        basic.pie.main.setAlpha((30 - sliceId) / 30 / 3);
+        basic.pie.main.setLineWidth((sliceId + 1) * 3 * slice[0].zScale);
+        basic.pie.main.plotPolyline(slice.map(point => point.coords));
+      })
     }
   }
 }

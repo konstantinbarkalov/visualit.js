@@ -10,7 +10,6 @@ const overscan = 1800;
 let fieldWidth = null;
 let fieldHeight = null;
 let fieldDepth = null;
-let fieldCenter = null;
 let screenCenter = null;
 
 let camera = null;
@@ -22,15 +21,15 @@ let sparclePool = null;
 let cubusPool = null;
 let playerPool = null;
 let starlanePool = null;
+let spitPool = null;
 let axisDisplay = null;
-
+window.flyMode = 3; // flyMode TODO: remove
 function artMilkInit() {
 
 
   fieldWidth = basic.input.w + overscan + unsafeMargin * 2;
   fieldHeight = basic.input.h;
   fieldDepth = 1000;
-  fieldCenter = new Point3D(0, 0, 0);
   screenCenter = new Point2D(basic.input.w / 2, basic.input.h / 2);
 
   zodiacPolys = shiftPolys(idealZodiacPolys, 0, 0, 0.0);
@@ -52,6 +51,7 @@ function artMilkInit() {
   cubusPool = new CubusPool();
   playerPool = new PlayerPool();
   starlanePool = new StarlanePool();
+  spitPool = new SpitPool();
   axisDisplay = new AxisDisplay();
 
 
@@ -82,10 +82,11 @@ function artMilkIteration(t, dt) {
   const minDolly = 500;
   const correction = minDolly - minDolly / (1 + epsilon); // to ingnore epsilon influesnce of ratio = 1, to stick exactly to minDolly
   camera.dolly = minDolly / (smoothInput.scrollShiftRatio + epsilon) + correction;
-  camera.scale = Math.pow(2, smoothInput.scrollAltRatio - 0.5);
+  camera.scale2D = Math.pow(2, smoothInput.scrollAltRatio - 0.5);
   //camera.unitPlanePosition.coords.z = smoothInput.scrollRatio * 1 - 0.5;
-  camera.unitPlanePosition.coords.x = - smoothInput.xRatio * 800 + 400;
-
+  camera.unitPlanePosition.coords.x = smoothInput.xRatio * 800 - 400;
+  camera.pitch = Math.PI * (smoothInput.upDownButtonRatio - 0.5);
+  camera.yaw = Math.PI * (smoothInput.leftRightButtonRatio - 0.5);
 
   if (basic.input.isPrimaryPressed) {
     for (let j = 0; j < 1; j++) {
@@ -117,6 +118,9 @@ function artMilkIteration(t, dt) {
 
   starlanePool.phisicIteration(t, dt);
   starlanePool.drawIteration(t, dt);
+
+  spitPool.phisicIteration(t, dt);
+  spitPool.drawIteration(t, dt);
 
   axisDisplay.phisicIteration(t, dt);
   axisDisplay.drawIteration(t, dt);

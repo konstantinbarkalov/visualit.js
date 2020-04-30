@@ -9,12 +9,14 @@ class VisualitCanvas {
     this.plotColorName = null; // via this.basic.setColor
     this.alpha = null; // via this.basic.setAlpha
     this.lineWidth = null; // via this.basic.setLineWidth
+    this.fontSize = null;
     window.addEventListener('resize', () => {
       this.onResize();
     });
     this.basic.setColor(0, 0, 255);
     this.basic.setAlpha(1);
     this.basic.setLineWidth(1);
+    this.basic.setFontSize(10);
     this.onResize(); // this.initStyle(); inside
   }
   onResize() {
@@ -32,6 +34,7 @@ class VisualitCanvas {
     this.ctx.globalAlpha = this.alpha;
     this.ctx.lineWidth = this.lineWidth;
     this.ctx.lineJoin='bevel';
+    this.ctx.font = this.fontSize + 'px sans-serif';
   }
   updateFillColor(colorName) {
     if (this.fillColorName !== colorName) {
@@ -55,6 +58,12 @@ class VisualitCanvas {
     if (this.lineWidth !== lineWidth) {
       this.lineWidth = lineWidth;
       this.ctx.lineWidth = lineWidth;
+    }
+  }
+  updateFontSize(fontSize) {
+    if (this.fontSize !== fontSize) {
+      this.fontSize = fontSize;
+      this.ctx.font = this.fontSize + 'px sans-serif';
     }
   }
   clampChannel(c) {
@@ -114,6 +123,9 @@ class VisualitCanvas {
     },
     setLineWidth: (lineWidth) => {
       this.updateLineWidth(lineWidth);
+    },
+    setFontSize: (fontSize) => {
+      this.updateFontSize(fontSize);
     },
     fillRect: (xFrom, yFrom, xTo, yTo) => {
       this.ctx.fillRect(xFrom, yFrom, xTo - xFrom, yTo - yFrom);
